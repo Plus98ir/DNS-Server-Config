@@ -135,11 +135,14 @@ chmod +x /usr/local/bin/adguard-monitor.sh
 # ---------------------------------------------------------
 cat << 'EOF' > /root/traffic.sh
 #!/bin/bash
+# --- فایل تنظیمات ---
 SETTINGS_FILE="$HOME/.traffic_settings"
 EXTRA_FILE="$HOME/.extra_traffic"
-BASE_LIMIT=100
+# --- تنظیمات پایه ---
+BASE_LIMIT=100   # سقف پایه به GB
 EXPIRY_DATE="2026-07-10"
 
+# بارگذاری تنظیمات
 if [ -f "$SETTINGS_FILE" ]; then
     source "$SETTINGS_FILE"
 else
@@ -157,24 +160,29 @@ OFFSET=${OFFSET:-0}
 BASE_LIMIT=${BASE_LIMIT:-200}
 EXTRA=${EXTRA:-0}
 
+# محاسبه سقف نهایی
 TOTAL_LIMIT=$(echo "scale=2; $BASE_LIMIT + $EXTRA_GB + $OFFSET" | bc)
 
+# --- بخش ریست ---
 if [ "$(date +%Y-%m-%d)" == "$EXPIRY_DATE" ]; then
     vnstat --create -i eth0 --force > /dev/null 2>&1
     rm -f "$EXTRA_FILE"
 fi
 
+# --- نمایش جدول مصرف روزانه ---
 echo -e "\e[1;36m====================================================\e[0m"
-echo -e "\e[1;33m   DATE         DOWNLOAD      UPLOAD        TOTAL\e[0m"
+echo -e "\e[1;33m   DATE         DOWNLOAD     UPLOAD       TOTAL\e[0m"
 echo -e "\e[1;36m----------------------------------------------------\e[0m"
-vnstat -d --short | grep -v "estimated" | grep -A 5 "day" | tail -n 5 | awk '{printf " %-12s %-12s %-12s %-12s
-", $1, $2$3, $5$6, $8$9}'
+vnstat -d --short | grep -v "estimated" | grep -A 5 "day" | tail -n 5 | \
+awk '{printf " %-12s %-12s %-12s %-12s\n", $1, $2$3, $5$6, $8$9}'
 echo -e "\e[1;36m----------------------------------------------------\e[0m"
 
+# --- استخراج مصرف دانلود (RX) ماه جاری ---
 MONTH_DATA=$(vnstat -m | grep "$(date +%Y-%m)")
 USED_RAW=$(echo "$MONTH_DATA" | awk '{print $2}')
 UNIT=$(echo "$MONTH_DATA" | awk '{print $3}' | tr -d '[:space:]')
 
+# تبدیل به گیگابایت برای محاسبه دقیق
 if [ "$UNIT" == "MiB" ]; then
     USED_GB=$(echo "scale=2; $USED_RAW / 1024" | bc)
 elif [ "$UNIT" == "KiB" ]; then
@@ -184,9 +192,13 @@ else
 fi
 USED_GB=${USED_GB:-0}
 
+# محاسبه باقی‌مانده (فقط بر اساس دانلود)
 REMAINING_GB=$(echo "scale=2; $TOTAL_LIMIT - $USED_GB" | bc)
+
+# --- محاسبه روزهای باقی‌مانده ---
 DAYS_LEFT=$(( ($(date -d "$EXPIRY_DATE" +%s) - $(date +%s)) / 86400 ))
 
+# --- نمایش اطلاعات ---
 echo -e "\e[1;32m Monthly Download: $USED_GB GB\e[0m"
 echo -e "\e[1;31m Traffic Left:     $REMAINING_GB GB / $TOTAL_LIMIT GB\e[0m"
 
@@ -200,12 +212,13 @@ else
 fi
 echo -e "\e[1;36m====================================================\e[0m"
 
+# --- منوی تعاملی ---
 echo -e "\e[1;33m[1] Add/Reduce GB  [2] Set Expiry Date  [3] Reset Extra
 [4] Sync Offset  [Enter] Exit\e[0m"
 read -p "Select option: " opt
 save_settings() {
     echo "EXTRA_GB=$EXTRA_GB" > "$SETTINGS_FILE"
-    echo "EXPIRY_DATE="$EXPIRY_DATE"" >> "$SETTINGS_FILE"
+    echo "EXPIRY_DATE=\"$EXPIRY_DATE\"" >> "$SETTINGS_FILE"
     echo "OFFSET=$OFFSET" >> "$SETTINGS_FILE"
 }
 case "$opt" in
