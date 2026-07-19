@@ -303,7 +303,7 @@ show_menu() {
     echo -e "3) ${RED}Remove IP${NC} manually"
     echo -e "4) ${YELLOW}Live Packet Monitor${NC}"
     echo -e "5) ${YELLOW}Real-time Bandwidth${NC} (iftop)"
-    echo -e "6) ${PURPLE}View GOST Logs${NC}"
+    echo -e "6) ${PURPLE}View IP's Log${NC}"
     echo -e "7) ${BLUE}Restart Services${NC}"
     echo -e "8) ${BLUE}Save & Persist All Rules${NC}"
     echo -e "9) ${RED}Manage Blacklist${NC}"
@@ -388,7 +388,7 @@ ${CYAN}Generating Full Traffic Report...${NC}"
             iftop -nNP -i any
             ;;
         6)
-            journalctl -u gost -n 50 --no-pager
+            journalctl -u adguard-monitor.service -n 50 --no-pager
             read -p "Press Enter..."
             ;;
         7)
