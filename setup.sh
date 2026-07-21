@@ -200,7 +200,7 @@ DAYS_LEFT=$(( ($(date -d "$EXPIRY_DATE" +%s) - $(date +%s)) / 86400 ))
 
 # --- نمایش اطلاعات ---
 echo -e "\e[1;32m Monthly Download: $USED_GB GB\e[0m"
-echo -e "\e[1;31m Traffic Left:     $REMAINING_GB GB / $TOTAL_LIMIT GB\e[0m"
+echo -e "\e[1;31m Traffic Left:     $REMAINING_GB GB of $TOTAL_LIMIT GB\e[0m"
 
 if (( $(echo "$EXTRA_GB != 0" | bc -l) )); then
     echo -e "\e[1;33m (Included $EXTRA_GB GB extra package)\e[0m"
@@ -273,7 +273,7 @@ figlet -f slant "TRAFFIC"
 echo -e "\e[0m"
 
 echo -e "\e[1;37m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-echo -e "\e[1;32m  TRAFFIC LEFT:   \e[1;33m$REMAINING_GB GB \e[1;37m/ $TOTAL_LIMIT GB\e[0m"
+echo -e "\e[1;32m  TRAFFIC LEFT:   \e[1;33m$REMAINING_GB GB \e[1;37mof $TOTAL_LIMIT GB\e[0m"
 echo -e "\e[1;37m----------------------------------------------------\e[0m"
 echo -e "\e[1;32m  DAYS LEFT:      \e[1;36m$DAYS_LEFT Days\e[0m"
 echo -e "\e[1;37m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
