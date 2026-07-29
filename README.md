@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🌍 Ultimate Server Setup & Routing Script
-### [🇺🇸 English Documentation](#english) | [🇮🇷 توضیحات مستندات فارسی](#persian)
+### [🇺🇸 English Documentation](./README.md) | [🇮🇷 توضیحات مستندات فارسی](./README-fa.md)
 
 </div>
 
