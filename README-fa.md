@@ -38,4 +38,4 @@
 ### 📜 قوانین و لیست پیش‌فرض
 هنگام نصب، اسکریپت از شما لینک گیت‌هاب برای لیست دامنه‌های تحریمی را می‌خواهد. اگر هنوز لیست اختصاصی خودتان را نساخته‌اید، می‌توانید از لیست پیش‌فرض و بهینه‌شده‌ی ما استفاده کنید. کافیست لینک زیر را کپی کرده و هنگام درخواست اسکریپت وارد کنید:
 ```text
-[https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt](https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt)
+(https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt)
