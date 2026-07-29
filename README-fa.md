@@ -42,7 +42,7 @@
    حالا کاربر می‌تواند با استفاده از این شناسه در ابتدای دامنه، به صورت کاملاً امن و رمزنگاری‌شده متصل شود:
    * **اتصال DoT (پروکسی و اندروید):** `tls://mohsen.yourdomain.com`
    * **اتصال DoH:** `https://yourdomain.com/dns-query/mohsen`
-<div dir="rtl" style="text-align: right;">
+   
 ---
 ##دستورات میانبر (Aliases) پس از نصب:
 
