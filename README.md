@@ -40,6 +40,12 @@ You can install and run the setup script using `curl`:
 curl -L -o install.sh (https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
 chmod +x install.sh
 ./install.sh
+```
+📜 Default Routing Rules
+During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use my default optimized list by pasting this link when prompted:
+
+```bash
+(https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt)
 
 ```
 * **Available Commands After Install** (Aliases):
@@ -134,11 +140,3 @@ now your client shoud use like this
 **DoH**: (https://yourdomain.com/dns-query/yourclientname)
 
 User id is serius but by name you can recognize who connected to your server in AdguardHome log manager
-
----
-
-📜 Default Routing Rules
-During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use our default optimized list by pasting this link when prompted:
-
-```bash
-(https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt)
