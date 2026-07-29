@@ -87,8 +87,10 @@ then you get your cert like this
 Then go to setting - encrypted like picture
 
 (except the red line on this pics its example for you if you give valid addres you will see green line)
-**(if you have another service in 443 becarefull dont use port 443 for doh use another port but 443 is safebut
-if you will use difrent port you your address is like this https://yourdomain.com:8443/dns-query/yourclientname )**
+
+**(if you have another service in 443 becarefull dont use port 443 for DoH use another port but 443 is safebut
+if you will use difrent port you your DoH address is like this https://yourdomain.com:8443/dns-query/yourclientname )**
+
 ---
 <img width="625" height="856" alt="image" src="https://github.com/user-attachments/assets/a826e104-25a9-47b0-a31e-bd9dc8941ea2" />
 ---
