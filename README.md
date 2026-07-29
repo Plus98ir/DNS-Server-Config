@@ -20,7 +20,7 @@ When you run this script, it automatically performs the following tasks:
 2. **Network Optimization (BBR):** Enables and configures TCP BBR and `fq` qdisc for optimal network congestion control and speed.
 3. **X-UI (Sanaei) Installation:** Automatically detects and installs the 3X-UI panel for proxy management if it's not already present.
 4. **AdGuard Home Configuration:**
-   * Installs AdGuard Home with a customized public configuration (Bind IP: `0.0.0.0`, Upstream: Local Unbound on `5335`).
+   * Installs AdGuard Home with a customized public configuration (Bind IP: `0.0.0.0`).
    * Optimizes cache sizes, disables unnecessary logging, and secures the DNS from public abuse.
 5. **Dynamic Access Control (IPSet & IPTables):**
    * **`restore_rules.sh`**: Rebuilds NAT and Mangle rules on boot to forward authorized traffic directly to local X-UI ports.
@@ -33,23 +33,10 @@ When you run this script, it automatically performs the following tasks:
    * **`display.sh`**: Shows a beautiful ASCII banner with remaining traffic automatically upon SSH login.
    * **`panel.sh` (`menu`)**: An interactive CLI menu to view active users, monitor bandwidth, manage blocklists, and restart services.
 
-### 🔒 How to Authorize Users (Wildcard Setup & Clients)
-To prevent your server from being used as an Open Resolver and to give each user private access, you must configure **Client IDs** using a Wildcard domain:
+### 🛠 Installation & Usage
+You can install and run the setup script using `curl`:
 
-1. **Get a Wildcard Domain:** 
-   In your domain's DNS manager (e.g., Cloudflare), create an `A` record with the name `*` (Wildcard) pointing to your Server IP. Ensure you have a Wildcard SSL certificate (e.g., `*.yourdomain.com`).
-2. **Add Clients in AdGuard Home:**
-   * Go to the AdGuard Home Web Panel.
-   * Navigate to **Settings** > **Client Settings** and click **Add Client**.
-   * Enter a Name for the user (e.g., `Mohsen`).
-   * In the **Identifiers** field, type a unique Client ID (e.g., `mohsen`).
-   * Save the client.
-3. **Connecting the User:**
-   The user can now connect securely using DoT or DoH. AdGuard will recognize them via the identifier:
-   * **DoT:** `tls://mohsen.yourdomain.com`
-   * **DoH:** `https://yourdomain.com/dns-query/mohsen`
-
-### 📜 Default Routing Rules
-During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use our default optimized list by pasting this link when prompted:
-```text
-(https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt)
+```bash
+curl -L -o install.sh [https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh](https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
+chmod +x install.sh
+./install.sh
