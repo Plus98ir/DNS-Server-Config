@@ -37,7 +37,7 @@ When you run this script, it automatically performs the following tasks:
 You can install and run the setup script using `curl`:
 
 ```bash
-curl -L -o install.sh (https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
+bash <(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
 ```
 📜 Default Routing Rules
 During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use my default optimized list by pasting this link when prompted:
