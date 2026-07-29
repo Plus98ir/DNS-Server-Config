@@ -117,18 +117,22 @@ In the Identifiers field, type a unique Client ID (e.g., sadeqpc1).
 
 Save the client.
 
+---
+
 Connecting the User:
 The user can now connect securely using DoT or DoH. AdGuard will recognize them via the identifier:
 
-DoT: tls://yourclientname.yourdomain.com
-
-DoH: https://yourdomain.com/dns-query/yourclientname
+*DoT: tls://yourclientname.yourdomain.com
+*DoH: https://yourdomain.com/dns-query/yourclientname
 
 **Recomend use spacial id like 67ca2c09 for any client**
 now your client shoud use lie this
-DoT: tls://67ca2c09.yourdomain.com
-DoH: https://yourdomain.com/dns-query/yourclientname
+*DoT: tls://67ca2c09.yourdomain.com
+*DoH: https://yourdomain.com/dns-query/yourclientname
+
 User id is serius but by name you can recognize who connected to your server in AdguardHome log manager
+
+---
 
 📜 Default Routing Rules
 During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use our default optimized list by pasting this link when prompted:
