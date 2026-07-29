@@ -37,21 +37,21 @@ When you run this script, it automatically performs the following tasks:
 You can install and run the setup script using `curl`:
 
 ```bash
-curl -L -o install.sh [https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh](https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
+curl -L -o install.sh (https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
 chmod +x install.sh
 ./install.sh
 
 ```
-Available Commands (Aliases):
+* **Available Commands After Install** (Aliases):
 
-Type menu anywhere in the terminal to open the interactive management panel.
+Type **menu** anywhere in the terminal to open the interactive management panel.
 
-Type hajm to view detailed bandwidth usage and manage traffic quotas.
+Type **hajm** to view detailed bandwidth usage and manage traffic quotas.
 
-⚙️ Important Post-Installation Steps (X-UI Configuration)
+⚙️ **Important Post-Installation Steps** (X-UI Configuration)
 The only thing you need to do after the installation is to configure the X-UI Sanaei panel as follows:
 
-Create two new Inbounds of type Tunnel.
+Create two new Inbounds of type **Tunnel**.
 
 Set the listening address (Listen IP) for both to 127.0.0.1. Configure the first one on port 443 and the second one on port 80.
 
@@ -59,11 +59,38 @@ For both Inbounds, ensure that Sniffing is enabled, and explicitly check the qui
 
 Finally, go to the Routing Rules section in the Sanaei panel. Route these two inbounds to an Outbound (preferably, under current network conditions, a REALITY config connected to your foreign server, or any other outbound that bypasses sanctions).
 
-🔒 How to Authorize Users (Wildcard Setup & Clients)
+🔒 **How to Authorize Users** (Wildcard Setup & Clients)
 To prevent your server from being used as an Open Resolver and to give each user private access, you must configure Client IDs using a Wildcard domain:
 
 Get a Wildcard Domain:
 In your domain's DNS manager (e.g., Cloudflare), create an A record with the name * (Wildcard) pointing to your Server IP. Ensure you have a Wildcard SSL certificate (e.g., *.yourdomain.com).
+you can use Certbot First need istall **certbot**
+```txt
+apt install certbot
+```
+then run command for get cert :
+```txt
+certbot certonly \
+--manual \
+--preferred-challenges dns \
+-d "*.yourdomain.com" \
+-d "yourdomain.com"
+```
+you need add 2 record as text in your cloudflare step by step follow certbot 
+then you get your cert like this
+```txt
+/etc/letsencrypt/live/yourdomain.com/fullchain.pem
+```
+```txt
+/etc/letsencrypt/live/yourdomain.com/privkey.pem
+```
+Then go to setting - encrypted like picture
+**(except the red line on this pics its example for you if you give valid addres you will see green line)**
+
+<img width="1025" height="1265" alt="image" src="https://github.com/user-attachments/assets/a826e104-25a9-47b0-a31e-bd9dc8941ea2" />
+so now you can go in setup guid and you will see your doh and dot and quic also ip address but in this education IP not work becuse its privet mode
+
+<img width="919" height="887" alt="image" src="https://github.com/user-attachments/assets/5057a5a0-2bdb-48f0-b627-546a2323adb5" />
 
 Add Clients in AdGuard Home:
 
@@ -71,18 +98,24 @@ Go to the AdGuard Home Web Panel.
 
 Navigate to Settings > Client Settings and click Add Client.
 
-Enter a Name for the user (e.g., Mohsen).
+Enter a Name for the user (e.g., Sadeq-Pc).
 
-In the Identifiers field, type a unique Client ID (e.g., mohsen).
+In the Identifiers field, type a unique Client ID (e.g., sadeqpc1).
 
 Save the client.
 
 Connecting the User:
 The user can now connect securely using DoT or DoH. AdGuard will recognize them via the identifier:
 
-DoT: tls://mohsen.yourdomain.com
+DoT: tls://yourclientname.yourdomain.com
 
-DoH: https://yourdomain.com/dns-query/mohsen
+DoH: https://yourdomain.com/dns-query/yourclientname
+
+**Recomend use spacial id like 67ca2c09 for any client**
+now your client shoud use lie this
+DoT: tls://67ca2c09.yourdomain.com
+DoH: https://yourdomain.com/dns-query/yourclientname
+User id is serius but by name you can recognize who connected to your server in AdguardHome log manager
 
 📜 Default Routing Rules
 During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use our default optimized list by pasting this link when prompted:
