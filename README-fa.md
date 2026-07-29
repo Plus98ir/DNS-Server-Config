@@ -7,7 +7,6 @@
 
 ---
 
----
 
 <div dir="rtl" style="text-align: right;">
 
