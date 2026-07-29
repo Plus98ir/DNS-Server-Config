@@ -57,13 +57,12 @@ Type **menu** anywhere in the terminal to open the interactive management panel.
 here you can choise what you want to do
 
 ---
-
----
 Type **hajm** to view detailed bandwidth usage and manage traffic quotas.
 
 <img width="412" height="272" alt="image" src="https://github.com/user-attachments/assets/fa59b82b-9789-4f11-ae99-4ebec481be3c" />
  
  you can adjust and set by your server defualt time and GB 
+ 
 ---
 
 ⚙️ **Important Post-Installation Steps** (X-UI Configuration)
