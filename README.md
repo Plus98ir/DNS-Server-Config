@@ -40,3 +40,52 @@ You can install and run the setup script using `curl`:
 curl -L -o install.sh [https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh](https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
 chmod +x install.sh
 ./install.sh
+
+```
+Available Commands (Aliases):
+
+Type menu anywhere in the terminal to open the interactive management panel.
+
+Type hajm to view detailed bandwidth usage and manage traffic quotas.
+
+⚙️ Important Post-Installation Steps (X-UI Configuration)
+The only thing you need to do after the installation is to configure the X-UI Sanaei panel as follows:
+
+Create two new Inbounds of type Tunnel.
+
+Set the listening address (Listen IP) for both to 127.0.0.1. Configure the first one on port 443 and the second one on port 80.
+
+For both Inbounds, ensure that Sniffing is enabled, and explicitly check the quic, http, and tls options.
+
+Finally, go to the Routing Rules section in the Sanaei panel. Route these two inbounds to an Outbound (preferably, under current network conditions, a REALITY config connected to your foreign server, or any other outbound that bypasses sanctions).
+
+🔒 How to Authorize Users (Wildcard Setup & Clients)
+To prevent your server from being used as an Open Resolver and to give each user private access, you must configure Client IDs using a Wildcard domain:
+
+Get a Wildcard Domain:
+In your domain's DNS manager (e.g., Cloudflare), create an A record with the name * (Wildcard) pointing to your Server IP. Ensure you have a Wildcard SSL certificate (e.g., *.yourdomain.com).
+
+Add Clients in AdGuard Home:
+
+Go to the AdGuard Home Web Panel.
+
+Navigate to Settings > Client Settings and click Add Client.
+
+Enter a Name for the user (e.g., Mohsen).
+
+In the Identifiers field, type a unique Client ID (e.g., mohsen).
+
+Save the client.
+
+Connecting the User:
+The user can now connect securely using DoT or DoH. AdGuard will recognize them via the identifier:
+
+DoT: tls://mohsen.yourdomain.com
+
+DoH: https://yourdomain.com/dns-query/mohsen
+
+📜 Default Routing Rules
+During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use our default optimized list by pasting this link when prompted:
+
+```bash
+(https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt)
