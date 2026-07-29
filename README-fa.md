@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🌍 اسکریپت جامع راه‌اندازی سرور و مسیریابی
-**نصاب خودکار X-UI، AdGuard Home، فایروال و مدیریت ترافیک**
+### [🇺🇸 English Documentation](./README.md) | [🇮🇷 توضیحات مستندات فارسی](./README-fa.md)
 
 </div>
 
