@@ -85,12 +85,15 @@ then you get your cert like this
 /etc/letsencrypt/live/yourdomain.com/privkey.pem
 ```
 Then go to setting - encrypted like picture
+
 **(except the red line on this pics its example for you if you give valid addres you will see green line)**
-
-<img width="1025" height="1265" alt="image" src="https://github.com/user-attachments/assets/a826e104-25a9-47b0-a31e-bd9dc8941ea2" />
+---
+<img width="625" height="856" alt="image" src="https://github.com/user-attachments/assets/a826e104-25a9-47b0-a31e-bd9dc8941ea2" />
+---
 so now you can go in setup guid and you will see your doh and dot and quic also ip address but in this education IP not work becuse its privet mode
-
-<img width="919" height="887" alt="image" src="https://github.com/user-attachments/assets/5057a5a0-2bdb-48f0-b627-546a2323adb5" />
+---
+<img width="819" height="787" alt="image" src="https://github.com/user-attachments/assets/5057a5a0-2bdb-48f0-b627-546a2323adb5" />
+---
 
 Add Clients in AdGuard Home:
 
