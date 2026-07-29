@@ -92,13 +92,17 @@ Then go to setting - encrypted like picture
 if you will use difrent port you your DoH address is like this https://yourdomain.com:8443/dns-query/yourclientname )**
 
 ---
+
 <img width="625" height="856" alt="image" src="https://github.com/user-attachments/assets/a826e104-25a9-47b0-a31e-bd9dc8941ea2" />
+
 ---
 
 so now you can go in setup guid and you will see your doh and dot and quic also ip address but in this education IP not work becuse its privet mode
 
 ---
+
 <img width="819" height="787" alt="image" src="https://github.com/user-attachments/assets/5057a5a0-2bdb-48f0-b627-546a2323adb5" />
+
 ---
 
 Add Clients in AdGuard Home:
