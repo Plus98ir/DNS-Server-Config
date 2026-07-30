@@ -40,7 +40,7 @@ When you run this script, it automatically performs the following tasks:
 You can install and run the setup script using `curl`:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Plus98ir/DNS-Server-Config/refs/heads/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Plus98ir/DNS-Server-Config/main/install.sh)
 ```
 "During installation, you will be asked to provide the following details for AdGuard Home:
 
