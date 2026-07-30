@@ -185,3 +185,11 @@ now your client shoud use like this
 **DoH**: (https://yourdomain.com/dns-query/yourclientname)
 
 The User ID is important, but by name, you can recognize who connected to your server in the AdGuard Home log manager.
+
+---
+If you run into any issues, feel free to contact me on Telegram. I will get back to you as soon as possible.
+
+```txt
+@PlusNE
+```
+
