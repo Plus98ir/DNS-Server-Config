@@ -57,7 +57,7 @@
 
 فایل تنظیمات مربوطه را باز کرده، عبارت DNSStubListener=yes را از حالت کامنت خارج کنید و آن را به مقدار DNSStubListener=no تغییر دهید. 
 
-```text
+```txt
 nano /etc/systemd/resolved.conf
 ```
 
@@ -65,7 +65,7 @@ nano /etc/systemd/resolved.conf
 سپس systemd-resolved.service را ریستارت کنید و اقدام به نصب نمایید.
 
 
-```text
+```txt
 systemctl restart systemd-resolved.service
 ```
 
