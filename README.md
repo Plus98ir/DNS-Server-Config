@@ -35,6 +35,18 @@ When you run this script, it automatically performs the following tasks:
    * **`traffic.sh` (`hajm`)**: Calculates precise bandwidth usage, remaining quotas, and handles monthly resets.
    * **`display.sh`**: Shows a beautiful ASCII banner with remaining traffic automatically upon SSH login.
    * **`panel.sh` (`menu`)**: An interactive CLI menu to view active users, monitor bandwidth, manage blocklists, and restart services.
+  
+     Note: Before proceeding with the installation, ensure that port 53 on the server is not occupied by another service.
+Open the relevant configuration file, uncomment the line DNSStubListener=yes, and change it to DNSStubListener=no.
+
+```txt
+nano /etc/systemd/resolved.conf
+```
+Then, restart systemd-resolved.service and proceed with the installation.
+
+```txt
+systemctl restart systemd-resolved.service
+```
 
 ### 🛠 Installation & Usage
 You can install and run the setup script using `curl`:
