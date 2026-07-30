@@ -509,14 +509,14 @@ NC='\033[0m'
 show_menu() {
     clear
     echo -e "${BLUE}==============================================${NC}"
-    echo -e "${CYAN}        SERVER USAGE PANEL - IRAN          ${NC}"
+    echo -e "${CYAN}     SERVER USAGE PANEL - Press Q (Back)          ${NC}"
     echo -e "${BLUE}==============================================${NC}"
     echo -e "1) ${GREEN}Active Users Report${NC} (Traffic + ISP + Timeout)"
     echo -e "2) ${GREEN}Add New IP${NC} manually"
     echo -e "3) ${RED}Remove IP${NC} manually"
     echo -e "4) ${YELLOW}Live Packet Monitor${NC}"
     echo -e "5) ${YELLOW}Real-time Bandwidth${NC} (iftop)"
-    echo -e "6) ${PURPLE}View GOST Logs${NC}"
+    echo -e "6) ${PURPLE}Connected IP Logs${NC}"
     echo -e "7) ${BLUE}Restart Services${NC}"
     echo -e "8) ${BLUE}Save & Persist All Rules${NC}"
     echo -e "9) ${RED}Manage Blacklist${NC}"
@@ -607,7 +607,7 @@ while true; do
             iftop -nNP -i any
             ;;
         6)
-            journalctl -u gost -n 50 --no-pager
+            journalctl -u adguard-monitor.service -n 50 --no-pager
             read -p "Press Enter..."
             ;;
         7)
