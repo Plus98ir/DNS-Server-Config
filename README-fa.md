@@ -56,7 +56,7 @@
 🛠 آموزش نصب و استفاده
 می‌توانید اسکریپت نصب را با استفاده از curl اجرا کنید:
 ```bash
-bash <(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/Plus98ir/DNS-Server-Config/refs/heads/main/install.sh)
 ```
 در طول فرآیند نصب، از شما خواسته می‌شود تا اطلاعات زیر را برای AdGuard Home وارد کنید:
 
