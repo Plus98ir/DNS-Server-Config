@@ -116,7 +116,8 @@ certbot certonly \
 
 (اگر سرویس دیگری روی پورت 443 دارید، مراقب باشید و از پورت 443 برای DoH استفاده نکنید.
 از یک پورت دیگر استفاده کنید. پورت 443 امن است، اما اگر از پورت دیگری استفاده کنید، آدرس DoH شما به این شکل خواهد شد:
-https://yourdomain.com:8443/dns-query/yourclientname)
+
+(https://yourdomain.com:8443/dns-query/yourclientname)
 
 ---
 <img width="625" height="856" alt="image" src="https://github.com/user-attachments/assets/a826e104-25a9-47b0-a31e-bd9dc8941ea2" />
