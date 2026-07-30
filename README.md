@@ -11,6 +11,9 @@
 ## 🇺🇸 English Documentation
 
 ### 📌 Overview
+
+* **Important Note: Please be very careful when entering your password. If you enter the incorrect password twice, the system will automatically block your device's IP (the computer or phone you are connecting from) — meaning it is not the server's IP. If this happens, you will need to change your local internet IP to reconnect.** *
+  
 This script is an **All-in-One Automated Setup** for creating a secure, high-performance routing server. It automatically installs and configures essential tools for traffic routing, DNS management, bandwidth monitoring, and user access control. It is designed to be public and deployable on any server.
 
 ### 🚀 Features & What It Does
