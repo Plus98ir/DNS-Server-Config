@@ -80,7 +80,6 @@ Navigate to Filters > DNS blocklists, and click the blue Check for updates butto
 ---
 
 * **Available Commands After Install** (Aliases):
----
 Type * **menu** * anywhere in the terminal to open the interactive management panel.
 
 <img width="379" height="255" alt="image" src="https://github.com/user-attachments/assets/65b35cf0-c95e-4f04-a5cb-d20e0ae752bf" />
