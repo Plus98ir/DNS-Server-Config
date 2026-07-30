@@ -52,14 +52,14 @@ Type **menu** anywhere in the terminal to open the interactive management panel.
 
 <img width="379" height="255" alt="image" src="https://github.com/user-attachments/assets/65b35cf0-c95e-4f04-a5cb-d20e0ae752bf" />
 
-here you can choise what you want to do
+**Here you can choose what you want to do.**
 
 ---
 Type **hajm** to view detailed bandwidth usage and manage traffic quotas.
 
 <img width="412" height="272" alt="image" src="https://github.com/user-attachments/assets/fa59b82b-9789-4f11-ae99-4ebec481be3c" />
  
- you can adjust and set by your server defualt time and GB 
+ **You can adjust and set it by your server's default time and GB.**
  
 ---
 
@@ -79,11 +79,12 @@ To prevent your server from being used as an Open Resolver and to give each user
 
 Get a Wildcard Domain:
 In your domain's DNS manager (e.g., Cloudflare), create an A record with the name * (Wildcard) pointing to your Server IP. Ensure you have a Wildcard SSL certificate (e.g., *.yourdomain.com).
-you can use Certbot First need istall **certbot**
+You can use Certbot. First, you need to install **certbot**:
 ```txt
 apt install certbot
 ```
-then run command for get cert :
+Then run the command to get the certificate:
+
 ```txt
 certbot certonly \
 --manual \
@@ -91,20 +92,22 @@ certbot certonly \
 -d "*.yourdomain.com" \
 -d "yourdomain.com"
 ```
-you need add 2 record as text in your cloudflare step by step follow certbot 
-then you get your cert like this
+You need to add 2 records as text in your Cloudflare; step-by-step, follow Certbot.
+Then you will get your certificate paths like this:
+
 ```txt
 /etc/letsencrypt/live/yourdomain.com/fullchain.pem
 ```
 ```txt
 /etc/letsencrypt/live/yourdomain.com/privkey.pem
 ```
-Then go to setting - encrypted like picture
+Then go to Settings > Encryption like the picture:
 
-(except the red line on this pics its example for you if you give valid addres you will see green line)
+(Except the red line on this picture is an example for you; if you provide a valid address, you will see a green line.)
 
-**(if you have another service in 443 becarefull dont use port 443 for DoH use another port but 443 is safebut
-if you will use difrent port you your DoH address is like this https://yourdomain.com:8443/dns-query/yourclientname )**
+**(If you have another service on port 443, be careful and don't use port 443 for DoH.
+Use another port. 443 is safe, but if you use a different port, your DoH address will look like this: 
+https://yourdomain.com:8443/dns-query/yourclientname)**
 
 ---
 
@@ -112,7 +115,7 @@ if you will use difrent port you your DoH address is like this https://yourdomai
 
 ---
 
-so now you can go in setup guid and you will see your doh and dot and quic also ip address but in this education IP not work becuse its privet mode
+So now you can go to the setup guide and you will see your DoH, DoT, and QUIC, as well as your IP address. But in this tutorial, the IP will not work because it's in private mode.
 
 ---
 
@@ -148,4 +151,4 @@ now your client shoud use like this
 
 **DoH**: (https://yourdomain.com/dns-query/yourclientname)
 
-User id is serius but by name you can recognize who connected to your server in AdguardHome log manager
+The User ID is important, but by name, you can recognize who connected to your server in the AdGuard Home log manager.
