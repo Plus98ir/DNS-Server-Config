@@ -7,33 +7,44 @@
 # توقف اسکریپت در صورت بروز خطای بحرانی
 set -e
 
+# این خط باعث می‌شود اسکریپت هنگام اجرا با curl، حتماً منتظر تایپ کیبورد بماند
+exec < /dev/tty
+
 echo -e "\e[1;36m====================================================\e[0m"
 echo -e "\e[1;33m  INITIAL CONFIGURATION \e[0m"
 echo -e "\e[1;36m====================================================\e[0m"
 
-# دریافت لینک گیت‌هاب با استفاده از /dev/tty برای اجرا با curl
-read -p "Enter GitHub Raw URL for your rules (Leave blank to skip): " GITHUB_URL < /dev/tty
+# دریافت مقادیر از کاربر
+read -p "Enter GitHub Raw URL for your rules (Leave blank to skip): " GITHUB_URL
 
-# دریافت تنظیمات پنل مدیریت AdGuard Home
-read -p "Enter AdGuard Home Web UI Port (Default 8090): " AGH_PORT < /dev/tty
+read -p "Enter AdGuard Home Web UI Port (Default 8090): " AGH_PORT
 AGH_PORT=${AGH_PORT:-8090}
 
-read -p "Enter AdGuard Home Username (Default plus98): " AGH_USER < /dev/tty
+read -p "Enter AdGuard Home Username (Default plus98): " AGH_USER
 AGH_USER=${AGH_USER:-plus98}
 
-read -p "Enter AdGuard Home Password (Default plus98): " AGH_PASS < /dev/tty
+read -p "Enter AdGuard Home Password (Default plus98): " AGH_PASS
 AGH_PASS=${AGH_PASS:-plus98}
 
 echo -e "\e[1;36m[1/8] Updating system and installing dependencies...\e[0m"
 apt-get update -y
 apt-get install -y curl wget nano iptables vnstat ipset bc nethogs iftop jq figlet apache2-utils
 
-# استخراج خودکار آی‌پی سرور پس از اطمینان از نصب curl
-SERVER_IP=$(curl -s ifconfig.me || curl -s ipinfo.io/ip || hostname -I | awk '{print $1}')
-if [ -z "$SERVER_IP" ]; then
-    echo -e "\e[1;31mCould not detect Server IP automatically!\e[0m"
-    read -p "Please enter your Server IP manually: " SERVER_IP < /dev/tty
+# تلاش برای استخراج آی‌پی سرور از منابع مختلف
+SERVER_IP=$(curl -s4 api.ipify.org || curl -s4 icanhazip.com || curl -s4 ifconfig.me)
+
+# بررسی اینکه آیا مقدار دریافتی واقعاً یک آی‌پی معتبر است (نه صفحه HTML)
+if [[ ! "$SERVER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    # تلاش برای دریافت آی‌پی محلی رابط شبکه
+    SERVER_IP=$(hostname -I | awk '{print $1}')
 fi
+
+# اگر باز هم آی‌پی معتبر نبود، از کاربر بپرسد
+if [[ ! "$SERVER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo -e "\e[1;31mCould not detect Server IP automatically!\e[0m"
+    read -p "Please enter your Server IP manually: " SERVER_IP
+fi
+
 echo -e "\e[1;32mServer IP detected as: $SERVER_IP\e[0m"
 echo ""
 
