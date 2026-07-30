@@ -43,19 +43,17 @@ bash <(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/downloa
 
 URL (for the rules)
 
+```txt
+https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
+
+```
 Port
-
 Username and Password
-
 Note: I recommend using my link for the rules. It is a complete anti-sanction list that is constantly updated."
 
 
 <img width="960" height="161" alt="image" src="https://github.com/user-attachments/assets/de6a8be4-1acb-446e-a9fa-7e722a9415e2" />
 
-```txt
-https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
-
-```
 After the installation is complete, your AdGuard address is:
 http://your-ip:port
 
