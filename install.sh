@@ -10,18 +10,30 @@ set -e
 echo -e "\e[1;36m====================================================\e[0m"
 echo -e "\e[1;33m  INITIAL CONFIGURATION \e[0m"
 echo -e "\e[1;36m====================================================\e[0m"
+
 # دریافت لینک گیت‌هاب در ابتدای کار
 read -p "Enter GitHub Raw URL for your rules (Leave blank to skip): " GITHUB_URL
+
+# دریافت تنظیمات پنل مدیریت AdGuard Home
+read -p "Enter AdGuard Home Web UI Port (Default 8090): " AGH_PORT
+AGH_PORT=${AGH_PORT:-8090}
+
+read -p "Enter AdGuard Home Username (Default plus98): " AGH_USER
+AGH_USER=${AGH_USER:-plus98}
+
+read -p "Enter AdGuard Home Password (Default plus98): " AGH_PASS
+AGH_PASS=${AGH_PASS:-plus98}
+
 # استخراج خودکار آی‌پی سرور
 SERVER_IP=$(curl -s ifconfig.me)
 echo -e "\e[1;32mServer IP detected as: $SERVER_IP\e[0m"
 echo ""
 
-echo -e "\e[1;36m[1/7] Updating system and installing dependencies...\e[0m"
+echo -e "\e[1;36m[1/8] Updating system and installing dependencies...\e[0m"
 apt-get update -y
-apt-get install -y curl wget nano iptables vnstat ipset bc nethogs iftop jq figlet
+apt-get install -y curl wget nano iptables vnstat ipset bc nethogs iftop jq figlet apache2-utils
 
-echo -e "\e[1;36m[2/7] Configuring BBR and sysctl...\e[0m"
+echo -e "\e[1;36m[2/8] Configuring BBR and sysctl...\e[0m"
 if ! grep -q "net.ipv4.tcp_congestion_control = bbr" /etc/sysctl.d/99-custom-bbr.conf 2>/dev/null; then
     cat << 'EOF' > /etc/sysctl.d/99-custom-bbr.conf
 net.ipv4.conf.all.route_localnet = 1
@@ -35,7 +47,7 @@ else
     echo -e "\e[1;32mBBR is already configured. Skipping...\e[0m"
 fi
 
-echo -e "\e[1;36m[3/7] Checking X-UI Sanaei...\e[0m"
+echo -e "\e[1;36m[3/8] Checking X-UI Sanaei...\e[0m"
 if ! command -v x-ui &> /dev/null; then
     echo "Installing X-UI..."
     bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
@@ -43,13 +55,16 @@ else
     echo -e "\e[1;32mX-UI is already installed. Skipping...\e[0m"
 fi
 
-echo -e "\e[1;36m[4/7] Checking & Configuring AdGuard Home...\e[0m"
+echo -e "\e[1;36m[4/8] Checking & Configuring AdGuard Home...\e[0m"
 if [ ! -d "/opt/AdGuardHome" ] && ! command -v AdGuardHome &> /dev/null; then
     echo "Installing AdGuard Home..."
     curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
 else
     echo -e "\e[1;32mAdGuard Home is already installed.\e[0m"
 fi
+
+echo "Generating AdGuard Home password hash..."
+AGH_HASH=$(htpasswd -B -n -b "$AGH_USER" "$AGH_PASS" | cut -d ":" -f 2)
 
 echo "Applying custom AdGuard Home configuration..."
 systemctl stop AdGuardHome || true
@@ -66,11 +81,11 @@ http:
       - GET /dns-query/{ClientID}
       - POST /dns-query/{ClientID}
     insecure_enabled: false
-  address: 0.0.0.0:8090
+  address: 0.0.0.0:AGH_PORT_PLACEHOLDER
   session_ttl: 30d
 users:
-  - name: plus98
-    password: $2a$10$r.bG50/eZDvAgx443REjsOBV7QPl61e4hw0Y/5n8tf9aw.dP8QmGK
+  - name: AGH_USER_PLACEHOLDER
+    password: AGH_PASS_PLACEHOLDER
 auth_attempts: 5
 block_auth_min: 15
 http_proxy: ""
@@ -259,15 +274,18 @@ os:
 schema_version: 34
 EOF
 
+sed -i "s/AGH_PORT_PLACEHOLDER/$AGH_PORT/g" /opt/AdGuardHome/AdGuardHome.yaml
+sed -i "s/AGH_USER_PLACEHOLDER/$AGH_USER/g" /opt/AdGuardHome/AdGuardHome.yaml
+sed -i "s|AGH_PASS_PLACEHOLDER|$AGH_HASH|g" /opt/AdGuardHome/AdGuardHome.yaml
+
 systemctl start AdGuardHome
 
-
-echo -e "\e[1;36m[5/7] Injecting Custom Scripts (Updating existing ones)...\e[0m"
+echo -e "\e[1;36m[5/8] Injecting Custom Scripts (Updating existing ones)...\e[0m"
 
 # ---------------------------------------------------------
 # 1. Restore Rules Script
 # ---------------------------------------------------------
-cat << 'EOF' > /root/restore_rules.sh
+cat << EOF > /root/restore_rules.sh
 #!/bin/bash
 iptables -t nat -F PREROUTING
 iptables -t nat -F POSTROUTING
@@ -281,7 +299,7 @@ ipset create allowed_users hash:ip timeout 3600 counters
 ipset create blacklist hash:ip hashsize 4096 maxelem 65536 counters
 
 iptables -t nat -N ts-postrouting
-iptables -t nat -I PREROUTING 1 -d 109.70.76.135 -j RETURN
+iptables -t nat -I PREROUTING 1 -d $SERVER_IP -j RETURN
 iptables -t nat -A PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
 iptables -t nat -A PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:80
 iptables -t nat -A PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
@@ -518,14 +536,13 @@ chmod +x /root/panel.sh
 # ---------------------------------------------------------
 # 6. AdGuard GitHub Rules Updater Script
 # ---------------------------------------------------------
-echo -e "\e[1;36m[6/7] Creating AdGuard Updater Script...\e[0m"
+echo -e "\e[1;36m[6/8] Creating AdGuard Updater Script...\e[0m"
 cat << EOF > /root/update-adguard.sh
 #!/bin/bash
 URL="$GITHUB_URL"
 IP="$SERVER_IP"
 OUT="/opt/AdGuardHome/data/adguard-rewrite.txt"
 
-# ساخت دایرکتوری در صورت عدم وجود
 mkdir -p /opt/AdGuardHome/data/
 
 if [ -z "\$URL" ]; then
@@ -545,13 +562,11 @@ fi
 EOF
 chmod +x /root/update-adguard.sh
 
-# اجرای اولیه برای ساخت فایل قوانین
 /root/update-adguard.sh
 
-# افزودن کرون‌جاب برای آپدیت ۱۲ ساعته
 (crontab -l 2>/dev/null | grep -v "/root/update-adguard.sh"; echo "0 */12 * * * /root/update-adguard.sh") | crontab -
 
-echo -e "\e[1;36m[7/7] Finalizing Setup...\e[0m"
+echo -e "\e[1;36m[7/8] Finalizing Setup...\e[0m"
 
 systemctl daemon-reload
 systemctl enable adguard-monitor.service
@@ -568,6 +583,15 @@ if ! grep -q "/root/display.sh" ~/.bashrc; then
     echo "# Auto-display traffic on login" >> ~/.bashrc
     echo "/root/display.sh" >> ~/.bashrc
 fi
+
+echo -e "\e[1;36m[8/8] Executing Final Commands...\e[0m"
+# اجرای قوانین بازیابی شده
+echo "Running restore_rules.sh..."
+bash /root/restore_rules.sh
+
+# بارگذاری مجدد فایل .bashrc
+echo "Reloading .bashrc..."
+source ~/.bashrc || true
 
 echo -e "\e[1;32m===================================================================\e[0m"
 echo -e "\e[1;32m✅ Installation Completed Successfully!\e[0m"
