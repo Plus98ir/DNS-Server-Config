@@ -51,7 +51,7 @@ Port
 
 Username and Password
 
-Note: I recommend using my link for the rules. It is a complete anti-sanction list that is constantly updated."
+Note: I recommend using my link for the rules. It is a complete anti-sanction list that is constantly updated.
 
 
 <img width="960" height="161" alt="image" src="https://github.com/user-attachments/assets/de6a8be4-1acb-446e-a9fa-7e722a9415e2" />
@@ -67,6 +67,17 @@ further changes and configurations can be done directly in the /opt/AdGuardHome/
 📜 Default Routing Rules
 During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use my default optimized list by pasting this link when prompted:
 
+If you are using custom routing rules, you must execute the following command in your terminal after providing the rules URL
+
+```txt
+/root/update-adguard.sh
+```
+
+Navigate to Filters > DNS blocklists, and click the blue Check for updates button
+
+<img width="1363" height="799" alt="image" src="https://github.com/user-attachments/assets/d18b0f53-2f42-4494-af68-3f94069dd718" />
+
+---
 
 * **Available Commands After Install** (Aliases):
 ---
