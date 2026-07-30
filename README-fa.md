@@ -49,10 +49,12 @@ bash <(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/downloa
 ```
 در طول فرآیند نصب، از شما خواسته می‌شود تا اطلاعات زیر را برای AdGuard Home وارد کنید:
 
+---
+<img width="960" height="161" alt="image" src="https://github.com/user-attachments/assets/de6a8be4-1acb-446e-a9fa-7e722a9415e2" />
+
 ```txt
 https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
 ```
-<img width="960" height="161" alt="image" src="https://github.com/user-attachments/assets/de6a8be4-1acb-446e-a9fa-7e722a9415e2" />
 
 آدرس لینک (URL) (برای رول‌ها)
 
