@@ -496,14 +496,16 @@ chmod +x /root/display.sh
 # ---------------------------------------------------------
 cat << 'EOF' > /root/panel.sh
 #!/bin/bash
+# Fix for GoTTY/Web Terminal
 export TERM=xterm-256color
-RED='\e[0;31m'
-GREEN='\e[0;32m'
-YELLOW='\e[1;33m'
-BLUE='\e[0;34m'
-PURPLE='\e[0;35m'
-CYAN='\e[0;36m'
-NC='\e[0m'
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m'
 show_menu() {
     clear
     echo -e "${BLUE}==============================================${NC}"
@@ -514,7 +516,7 @@ show_menu() {
     echo -e "3) ${RED}Remove IP${NC} manually"
     echo -e "4) ${YELLOW}Live Packet Monitor${NC}"
     echo -e "5) ${YELLOW}Real-time Bandwidth${NC} (iftop)"
-    echo -e "6) ${PURPLE}View IP's Log${NC}"
+    echo -e "6) ${PURPLE}View GOST Logs${NC}"
     echo -e "7) ${BLUE}Restart Services${NC}"
     echo -e "8) ${BLUE}Save & Persist All Rules${NC}"
     echo -e "9) ${RED}Manage Blacklist${NC}"
@@ -527,19 +529,136 @@ while true; do
     show_menu
     read opt
     case $opt in
-        1) echo -e "\n${CYAN}Generating Full Traffic Report...${NC}"
-           read -p "Press Enter to return..." ;;
-        2) echo -n "Enter IP: "; read new_ip; ipset add allowed_users $new_ip --exist; sleep 1 ;;
-        3) echo -n "Enter IP to remove: "; read del_ip; ipset del allowed_users $del_ip; sleep 1 ;;
-        4) iptables -t nat -L PREROUTING -n -v --line-numbers; read -p "Press Enter..." ;;
-        5) iftop -nNP -i any ;;
-        6) journalctl -u adguard-monitor.service -n 50 --no-pager; read -p "Press Enter..." ;;
-        7) systemctl restart gost; echo -e "${GREEN}Restarted.${NC}"; sleep 1 ;;
-        8) netfilter-persistent save; ipset save > /etc/ipset.conf; sleep 1 ;;
-        9) read -p "Press enter..." ;;
-        10) nethogs ;;
-        11) exit 0 ;;
-        *) echo "Invalid Option"; sleep 1 ;;
+        1)
+            echo -e "\n${CYAN}Generating Full Traffic Report...${NC}"
+            echo -e "${BLUE}--------------------------------------------------------------------------------${NC}"
+            printf "%-18s | %-12s | %-10s | %-20s\n" "Source/Service" "Traffic" "Status" "Description"
+            echo -e "${BLUE}--------------------------------------------------------------------------------${NC}"
+            
+            # --- بخش اصلاح شده: ترتیب پورت‌ها ۸۰، ۴۴۳ TCP و ۴۴۳ UDP ---
+            # ابتدا پورت ۸۰، سپس ۴۴۳ تی‌سی‌پی و در نهایت ۴۴۳ یودی‌پی
+            for item in "80:tcp" "443:tcp" "443:udp"; do
+                port=$(echo $item | cut -d: -f1)
+                proto=$(echo $item | cut -d: -f2)
+                
+                # فیلتر کردن ترافیک بر اساس پورت و پروتکل در iptables
+                raw_p=$(iptables -t mangle -L -n -v -x | grep -i "$proto" | grep -E "dpt:$port|spt:$port" | awk '{sum+=$2} END {print sum}')
+                
+                [ -z "$raw_p" ] || [ "$raw_p" == "0" ] && raw_p=0
+                if [ "$raw_p" -lt 1048576 ]; then
+                    p_traffic="$(($raw_p / 1024)) KB"
+                elif [ "$raw_p" -lt 1073741824 ]; then
+                    p_traffic="$(($raw_p / 1048576)) MB"
+                else
+                    p_traffic="$(awk "BEGIN {printf \"%.2f\", $raw_p/1073741824}") GB"
+                fi
+                
+                # تعیین نام نمایشی بر اساس پروتکل
+                if [ "$port" == "80" ]; then
+                    p_name="PORT:80"
+                else
+                    p_name="PORT:443 ($(echo $proto | tr '[:lower:]' '[:upper:]'))"
+                fi
+                
+                printf "${YELLOW}%-18s${NC} | ${GREEN}%-12s${NC} | ${CYAN}%-10s${NC} | ${PURPLE}%-20s${NC}\n" "$p_name" "$p_traffic" "GLOBAL" "Total Usage"
+            done
+            echo -e "${BLUE}--------------------------------------------------------------------------------${NC}"
+            # --- ادامه بخش ترافیک یوزرها ---
+            ipset_data=$(ipset list allowed_users 2>/dev/null | sed -n '/Members:/,$p' | tail -n +2)
+            if [ -n "$ipset_data" ]; then
+                while read -r line; do
+                    [ -z "$line" ] && continue
+                    ip=$(echo $line | awk '{print $1}')
+                    timeout=$(echo $line | awk '{print $3}')
+                    bytes=$(echo $line | grep -oP 'bytes \K[0-9]+')
+                    [ -z "$bytes" ] && bytes=0
+                    if [ "$bytes" -lt 1048576 ]; then u_traffic="$(($bytes / 1024)) KB";
+                    elif [ "$bytes" -lt 1073741824 ]; then u_traffic="$(($bytes / 1048576)) MB";
+                    else u_traffic="$(awk "BEGIN {printf \"%.2f\", $bytes/1073741824}") GB"; fi
+                    isp=$(curl -s --connect-timeout 2 "http://ip-api.com/line/$ip?fields=isp" | head -n 1)
+                    [[ -z "$isp" || "$isp" == *"{"* ]] && isp="Unknown" || isp=$(echo "$isp" | cut -c1-20)
+                    printf "${GREEN}%-18s${NC} | ${BLUE}%-12s${NC} | ${YELLOW}%-10s${NC} | ${PURPLE}%-20s${NC}\n" "$ip" "$u_traffic" "${timeout}s" "$isp"
+                done <<< "$ipset_data"
+            else
+                echo -e "${RED}             No active users in ipset list.                     ${NC}"
+            fi
+            echo -e "${BLUE}--------------------------------------------------------------------------------${NC}"
+            read -p "Press Enter to return..."
+            ;;
+        2)
+            echo -n "Enter IP: "
+            read new_ip
+            ipset add allowed_users $new_ip --exist
+            echo -e "${GREEN}IP $new_ip added.${NC}"
+            sleep 1
+            ;;
+        3)
+            echo -n "Enter IP to remove: "
+            read del_ip
+            ipset del allowed_users $del_ip
+            echo -e "${RED}IP $del_ip removed.${NC}"
+            sleep 1
+            ;;
+        4)
+            iptables -t nat -L PREROUTING -n -v --line-numbers
+            read -p "Press Enter..."
+            ;;
+        5)
+            iftop -nNP -i any
+            ;;
+        6)
+            journalctl -u gost -n 50 --no-pager
+            read -p "Press Enter..."
+            ;;
+        7)
+            systemctl restart gost
+            echo -e "${GREEN}Restarted.${NC}"
+            sleep 1
+            ;;
+        8)
+            netfilter-persistent save
+            ipset save > /etc/ipset.conf
+            echo -e "${GREEN}All rules and IPSets saved permanently.${NC}"
+            sleep 1
+            ;;
+        9)
+            echo -e "${RED}=== BLACKLISTED ATTACKERS ===${NC}"
+            count=$(ipset list blacklist 2>/dev/null | grep "Number of entries" | cut -d: -f2 | xargs)
+            if [ -z "$count" ] || [ "$count" == "0" ]; then
+                echo -e "${YELLOW}Blacklist is currently empty.${NC}"
+            else
+                echo -e "${YELLOW}Total Blocked IPs: $count${NC}"
+                echo -e "${BLUE}----------------------------------------------------------------------${NC}"
+                printf "%-18s | %-30s\n" "Blocked IP" "ISP/Organization"
+                echo -e "${BLUE}----------------------------------------------------------------------${NC}"
+                ips=$(ipset list blacklist | sed -n '/Members:/,$p' | tail -n +2)
+                while read -r bl_ip; do
+                    [ -z "$bl_ip" ] && continue
+                    bl_isp=$(curl -s --connect-timeout 2 "http://ip-api.com/line/$bl_ip?fields=isp" | head -n 1)
+                    [[ -z "$bl_isp" || "$bl_isp" == *"{"* ]] && bl_isp="Unknown" || bl_isp=$(echo "$bl_isp" | cut -c1-30)
+                    printf "${RED}%-18s${NC} | ${PURPLE}%-30s${NC}\n" "$bl_ip" "$bl_isp"
+                done <<< "$ips"
+                echo -e "${BLUE}----------------------------------------------------------------------${NC}"
+            fi
+            echo "1) Clear Blacklist"
+            echo "2) Back to Menu"
+            read -p "Select: " bl_opt
+            if [ "$bl_opt" == "1" ]; then
+                ipset flush blacklist
+                echo -e "${GREEN}Blacklist cleared!${NC}"
+                sleep 1
+            fi
+            ;;
+        10)
+            nethogs
+            ;;
+        11)
+            exit 0
+            ;;
+        *)
+            echo "Invalid Option"
+            sleep 1
+            ;;
     esac
 done
 EOF
