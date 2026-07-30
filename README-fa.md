@@ -56,15 +56,19 @@
 توجه: پیش از اقدام به نصب، اطمینان حاصل کنید که پورت ۵۳ سرور توسط سرویس دیگری اشغال نشده باشد.
 
 فایل تنظیمات مربوطه را باز کرده، عبارت DNSStubListener=yes را از حالت کامنت خارج کنید و آن را به مقدار DNSStubListener=no تغییر دهید. 
+
 ```text
 nano /etc/systemd/resolved.conf
 ```
 
+
 سپس systemd-resolved.service را ریستارت کنید و اقدام به نصب نمایید.
+
 
 ```text
 systemctl restart systemd-resolved.service
 ```
+
 
 
 🛠 آموزش نصب و استفاده
