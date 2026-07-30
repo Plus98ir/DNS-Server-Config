@@ -57,9 +57,19 @@ https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
 
 کلمه menu را در هر کجای ترمینال تایپ کنید تا منوی مدیریت تعاملی باز شود.
 
+---
+
+<img width="379" height="255" alt="image" src="https://github.com/user-attachments/assets/65b35cf0-c95e-4f04-a5cb-d20e0ae752bf" />
+
+---
 در اینجا می‌توانید انتخاب کنید که چه کاری می‌خواهید انجام دهید.
 
 کلمه hajm را تایپ کنید تا مصرف دقیق پهنای باند را مشاهده کرده و سهمیه ترافیک را مدیریت کنید.
+
+---
+
+<img width="412" height="272" alt="image" src="https://github.com/user-attachments/assets/fa59b82b-9789-4f11-ae99-4ebec481be3c" />
+
 
 شما می‌توانید آن را بر اساس زمان پیش‌فرض سرور و حجم دلخواه (GB) خود تنظیم کنید.
 
@@ -108,8 +118,18 @@ certbot certonly \
 از یک پورت دیگر استفاده کنید. پورت 443 امن است، اما اگر از پورت دیگری استفاده کنید، آدرس DoH شما به این شکل خواهد شد:
 https://yourdomain.com:8443/dns-query/yourclientname)
 
+---
+<img width="625" height="856" alt="image" src="https://github.com/user-attachments/assets/a826e104-25a9-47b0-a31e-bd9dc8941ea2" />
+
+----
+
 اکنون می‌توانید به بخش Setup Guide بروید و DoH، DoT و QUIC و همچنین آدرس آی‌پی خود را ببینید. اما در این آموزش، آی‌پی کار نخواهد کرد زیرا در حالت Private قرار دارد.
 
+---
+
+<img width="819" height="787" alt="image" src="https://github.com/user-attachments/assets/5057a5a0-2bdb-48f0-b627-546a2323adb5" />
+
+---
 افزودن کلاینت‌ها در AdGuard Home:
 
 وارد پنل وب AdGuard Home شوید.
