@@ -70,14 +70,14 @@ During installation, the script will ask for a GitHub URL. If you don't have you
 
 * **Available Commands After Install** (Aliases):
 ---
-Type **menu** anywhere in the terminal to open the interactive management panel.
+Type * **menu** * anywhere in the terminal to open the interactive management panel.
 
 <img width="379" height="255" alt="image" src="https://github.com/user-attachments/assets/65b35cf0-c95e-4f04-a5cb-d20e0ae752bf" />
 
 **Here you can choose what you want to do.**
 
 ---
-Type **hajm** to view detailed bandwidth usage and manage traffic quotas.
+Type * **hajm** * to view detailed bandwidth usage and manage traffic quotas.
 
 <img width="412" height="272" alt="image" src="https://github.com/user-attachments/assets/fa59b82b-9789-4f11-ae99-4ebec481be3c" />
  
