@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==========================================
 # Automated Server Setup Script (Public Version)
-# X-UI Sanaei, AdGuard Home, IPSet, BBR, Rules Updater
+# X-UI Sanaei, AdGuard Home, IPSet, BBR, Rules Updater, Fail2ban
 # ==========================================
 
 # توقف اسکریپت در صورت بروز خطای بحرانی
@@ -23,9 +23,10 @@ AGH_USER=${AGH_USER:-plus98}
 read -p "Enter AdGuard Home Password (Default plus98): " AGH_PASS </dev/tty
 AGH_PASS=${AGH_PASS:-plus98}
 
-echo -e "\e[1;36m[1/8] Updating system and installing dependencies...\e[0m"
+echo -e "\e[1;36m[1/9] Updating system and installing dependencies...\e[0m"
 apt-get update -y
-apt-get install -y curl wget nano iptables vnstat ipset bc nethogs iftop jq figlet apache2-utils
+# پکیج fail2ban اضافه شد
+apt-get install -y curl wget nano iptables vnstat ipset bc nethogs iftop jq figlet apache2-utils fail2ban
 
 # استخراج خودکار آی‌پی سرور
 SERVER_IP=$(curl -s4 api.ipify.org || curl -s4 icanhazip.com || curl -s4 ifconfig.me)
@@ -43,7 +44,7 @@ fi
 echo -e "\e[1;32mServer IP detected as: $SERVER_IP\e[0m"
 echo ""
 
-echo -e "\e[1;36m[2/8] Configuring BBR and sysctl...\e[0m"
+echo -e "\e[1;36m[2/9] Configuring BBR and sysctl...\e[0m"
 if ! grep -q "net.ipv4.tcp_congestion_control = bbr" /etc/sysctl.d/99-custom-bbr.conf 2>/dev/null; then
     cat << 'EOF' > /etc/sysctl.d/99-custom-bbr.conf
 net.ipv4.conf.all.route_localnet = 1
@@ -57,7 +58,7 @@ else
     echo -e "\e[1;32mBBR is already configured. Skipping...\e[0m"
 fi
 
-echo -e "\e[1;36m[3/8] Checking X-UI Sanaei...\e[0m"
+echo -e "\e[1;36m[3/9] Checking X-UI Sanaei...\e[0m"
 if ! command -v x-ui &> /dev/null; then
     echo "Installing X-UI..."
     bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
@@ -65,7 +66,7 @@ else
     echo -e "\e[1;32mX-UI is already installed. Skipping...\e[0m"
 fi
 
-echo -e "\e[1;36m[4/8] Checking & Configuring AdGuard Home...\e[0m"
+echo -e "\e[1;36m[4/9] Checking & Configuring AdGuard Home...\e[0m"
 if [ ! -d "/opt/AdGuardHome" ] && ! command -v AdGuardHome &> /dev/null; then
     echo "Installing AdGuard Home..."
     curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
@@ -290,7 +291,7 @@ sed -i "s|AGH_PASS_PLACEHOLDER|$AGH_HASH|g" /opt/AdGuardHome/AdGuardHome.yaml
 
 systemctl start AdGuardHome
 
-echo -e "\e[1;36m[5/8] Injecting Custom Scripts (Updating existing ones)...\e[0m"
+echo -e "\e[1;36m[5/9] Injecting Custom Scripts (Updating existing ones)...\e[0m"
 
 # ---------------------------------------------------------
 # 1. Restore Rules Script
@@ -309,6 +310,10 @@ ipset create allowed_users hash:ip timeout 3600 counters
 ipset create blacklist hash:ip hashsize 4096 maxelem 65536 counters
 
 iptables -t nat -N ts-postrouting
+
+# قانون دراپ کردن آی‌پی‌های بلک‌لیست اضافه شد
+iptables -t mangle -I PREROUTING 1 -m set --match-set blacklist src -j DROP
+
 iptables -t nat -I PREROUTING 1 -d $SERVER_IP -j RETURN
 iptables -t nat -A PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
 iptables -t nat -A PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:80
@@ -492,7 +497,7 @@ EOF
 chmod +x /root/display.sh
 
 # ---------------------------------------------------------
-# 5. Panel Menu Script
+# 5. Panel Menu Script (User Modified Version)
 # ---------------------------------------------------------
 cat << 'EOF' > /root/panel.sh
 #!/bin/bash
@@ -621,34 +626,49 @@ while true; do
             echo -e "${GREEN}All rules and IPSets saved permanently.${NC}"
             sleep 1
             ;;
-        9)
-            echo -e "${RED}=== BLACKLISTED ATTACKERS ===${NC}"
-            count=$(ipset list blacklist 2>/dev/null | grep "Number of entries" | cut -d: -f2 | xargs)
-            if [ -z "$count" ] || [ "$count" == "0" ]; then
-                echo -e "${YELLOW}Blacklist is currently empty.${NC}"
-            else
-                echo -e "${YELLOW}Total Blocked IPs: $count${NC}"
-                echo -e "${BLUE}----------------------------------------------------------------------${NC}"
-                printf "%-18s | %-30s\n" "Blocked IP" "ISP/Organization"
-                echo -e "${BLUE}----------------------------------------------------------------------${NC}"
-                ips=$(ipset list blacklist | sed -n '/Members:/,$p' | tail -n +2)
-                while read -r bl_ip; do
-                    [ -z "$bl_ip" ] && continue
-                    bl_isp=$(curl -s --connect-timeout 2 "http://ip-api.com/line/$bl_ip?fields=isp" | head -n 1)
-                    [[ -z "$bl_isp" || "$bl_isp" == *"{"* ]] && bl_isp="Unknown" || bl_isp=$(echo "$bl_isp" | cut -c1-30)
-                    printf "${RED}%-18s${NC} | ${PURPLE}%-30s${NC}\n" "$bl_ip" "$bl_isp"
-                done <<< "$ips"
-                echo -e "${BLUE}----------------------------------------------------------------------${NC}"
-            fi
-            echo "1) Clear Blacklist"
-            echo "2) Back to Menu"
-            read -p "Select: " bl_opt
-            if [ "$bl_opt" == "1" ]; then
-                ipset flush blacklist
-                echo -e "${GREEN}Blacklist cleared!${NC}"
-                sleep 1
-            fi
-            ;;
+        9) 
+           while true; do
+               clear
+               echo -e "${RED}==============================================${NC}"
+               echo -e "${RED}             MANAGE BLACKLIST                 ${NC}"
+               echo -e "${RED}==============================================${NC}"
+               echo -e "1) ${CYAN}Show Blacklisted IPs${NC}"
+               echo -e "2) ${RED}Add IP to Blacklist${NC}"
+               echo -e "3) ${GREEN}Remove IP from Blacklist${NC}"
+               echo -e "4) ${YELLOW}Back to Main Menu${NC}"
+               echo -e "${RED}----------------------------------------------${NC}"
+               read -p "Select an option [1-4]: " bl_opt
+               case $bl_opt in
+                   1) 
+                      echo -e "\n${YELLOW}Current Banned IPs:${NC}"
+                      ipset list blacklist | grep -E "^[0-9]" || echo -e "${GREEN}The blacklist is empty.${NC}"
+                      echo ""
+                      read -p "Press Enter to return..." 
+                      ;;
+                   2) 
+                      echo -n "Enter IP to ban: "
+                      read ban_ip
+                      ipset add blacklist $ban_ip -exist
+                      echo -e "${RED}[+] IP $ban_ip added to blacklist!${NC}"
+                      sleep 1 
+                      ;;
+                   3) 
+                      echo -n "Enter IP to unban: "
+                      read unban_ip
+                      ipset del blacklist $unban_ip
+                      echo -e "${GREEN}[-] IP $unban_ip removed from blacklist!${NC}"
+                      sleep 1 
+                      ;;
+                   4) 
+                      break 
+                      ;;
+                   *) 
+                      echo "Invalid Option"
+                      sleep 1 
+                      ;;
+               esac
+           done
+           ;;
         10)
             nethogs
             ;;
@@ -665,9 +685,44 @@ EOF
 chmod +x /root/panel.sh
 
 # ---------------------------------------------------------
-# 6. AdGuard GitHub Rules Updater Script
+# 6. Fail2ban Setup & Automated Blacklist Config
 # ---------------------------------------------------------
-echo -e "\e[1;36m[6/8] Creating AdGuard Updater Script...\e[0m"
+echo -e "\e[1;36m[6/9] Configuring Fail2ban for Automated Blacklist...\e[0m"
+
+mkdir -p /etc/fail2ban/action.d
+
+# ساخت اکشن سفارشی IPSet
+cat << 'EOF' > /etc/fail2ban/action.d/custom-ipset.conf
+[Definition]
+actionstart = ipset create blacklist hash:ip hashsize 4096 maxelem 65536 counters -exist
+actionstop = 
+actionban = ipset add blacklist <ip> -exist
+actionunban = ipset del blacklist <ip> -exist
+EOF
+
+# تعریف پیکربندی Jail برای مسدود کردن اسکنرهای SSH بعد از دو تلاش ناموفق
+cat << 'EOF' > /etc/fail2ban/jail.local
+[DEFAULT]
+banaction = custom-ipset
+banaction_allports = custom-ipset
+
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 2
+findtime = 600
+bantime = 86400
+EOF
+
+systemctl enable fail2ban
+systemctl restart fail2ban
+
+# ---------------------------------------------------------
+# 7. AdGuard GitHub Rules Updater Script
+# ---------------------------------------------------------
+echo -e "\e[1;36m[7/9] Creating AdGuard Updater Script...\e[0m"
 cat << EOF > /root/update-adguard.sh
 #!/bin/bash
 URL="$GITHUB_URL"
@@ -695,12 +750,15 @@ chmod +x /root/update-adguard.sh
 
 /root/update-adguard.sh
 
-# حل مشکل crontab با اضافه کردن || true
-(crontab -l 2>/dev/null | grep -v "/root/update-adguard.sh" || true; echo "0 */12 * * * /root/update-adguard.sh") | crontab -
-(crontab -l 2>/dev/null | grep -v "/root/update-adguard.sh" || true; echo "0 */12 * * * /root/restore_rules.sh") | crontab -
+# حل مشکل کرون‌جاب‌ها: grep برای جلوگیری از ایجاد خطوط تکراری اصلاح شد
+(crontab -l 2>/dev/null | grep -v "/root/update-adguard.sh" || true; echo "30 3 * * * /root/update-adguard.sh") | crontab -
+(crontab -l 2>/dev/null | grep -v "/root/restore_rules.sh" || true; echo "@reboot /root/restore_rules.sh"; echo "30 3 * * * /root/restore_rules.sh") | crontab - | crontab -
 
 
-echo -e "\e[1;36m[7/8] Finalizing Setup...\e[0m"
+# ---------------------------------------------------------
+# 8. Finalizing Setup
+# ---------------------------------------------------------
+echo -e "\e[1;36m[8/9] Finalizing Setup...\e[0m"
 
 systemctl daemon-reload
 systemctl enable adguard-monitor.service
@@ -718,12 +776,13 @@ if ! grep -q "/root/display.sh" ~/.bashrc; then
     echo "/root/display.sh" >> ~/.bashrc
 fi
 
-echo -e "\e[1;36m[8/8] Executing Final Commands...\e[0m"
-# اجرای قوانین بازیابی شده
+# ---------------------------------------------------------
+# 9. Executing Final Commands
+# ---------------------------------------------------------
+echo -e "\e[1;36m[9/9] Executing Final Commands...\e[0m"
 echo "Running restore_rules.sh..."
 bash /root/restore_rules.sh
 
-# بارگذاری مجدد فایل .bashrc
 echo "Reloading .bashrc..."
 source ~/.bashrc || true
 
