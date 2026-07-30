@@ -61,8 +61,10 @@ https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
 
 <img width="379" height="255" alt="image" src="https://github.com/user-attachments/assets/65b35cf0-c95e-4f04-a5cb-d20e0ae752bf" />
 
----
+
 در اینجا می‌توانید انتخاب کنید که چه کاری می‌خواهید انجام دهید.
+
+---
 
 کلمه hajm را تایپ کنید تا مصرف دقیق پهنای باند را مشاهده کرده و سهمیه ترافیک را مدیریت کنید.
 
@@ -73,6 +75,7 @@ https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
 
 شما می‌توانید آن را بر اساس زمان پیش‌فرض سرور و حجم دلخواه (GB) خود تنظیم کنید.
 
+---
 ⚙️ اقدامات مهم پس از نصب (تنظیمات X-UI)
 تنها کاری که پس از نصب باید انجام دهید، تنظیم پنل X-UI ثنایی به شرح زیر است:
 
