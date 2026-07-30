@@ -321,7 +321,9 @@ iptables -t mangle -A PREROUTING -p tcp --dport 80
 iptables -t mangle -A PREROUTING -m set --match-set allowed_users src
 EOF
 chmod +x /root/restore_rules.sh
-(crontab -l 2>/dev/null | grep -v "/root/restore_rules.sh"; echo "@reboot /root/restore_rules.sh") | crontab -
+
+# حل مشکل crontab با اضافه کردن || true
+(crontab -l 2>/dev/null | grep -v "/root/restore_rules.sh" || true; echo "@reboot /root/restore_rules.sh") | crontab -
 
 # ---------------------------------------------------------
 # 2. AdGuard Monitor Service & Script
@@ -574,7 +576,10 @@ chmod +x /root/update-adguard.sh
 
 /root/update-adguard.sh
 
-(crontab -l 2>/dev/null | grep -v "/root/update-adguard.sh"; echo "0 */12 * * * /root/update-adguard.sh") | crontab -
+# حل مشکل crontab با اضافه کردن || true
+(crontab -l 2>/dev/null | grep -v "/root/update-adguard.sh" || true; echo "0 */12 * * * /root/update-adguard.sh") | crontab -
+(crontab -l 2>/dev/null | grep -v "/root/update-adguard.sh" || true; echo "0 */12 * * * /root/restore_rules.sh") | crontab -
+
 
 echo -e "\e[1;36m[7/8] Finalizing Setup...\e[0m"
 
