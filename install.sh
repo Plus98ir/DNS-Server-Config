@@ -7,42 +7,37 @@
 # توقف اسکریپت در صورت بروز خطای بحرانی
 set -e
 
-# این خط باعث می‌شود اسکریپت هنگام اجرا با curl، حتماً منتظر تایپ کیبورد بماند
-exec < /dev/tty
-
 echo -e "\e[1;36m====================================================\e[0m"
 echo -e "\e[1;33m  INITIAL CONFIGURATION \e[0m"
 echo -e "\e[1;36m====================================================\e[0m"
 
-# دریافت مقادیر از کاربر
-read -p "Enter GitHub Raw URL for your rules (Leave blank to skip): " GITHUB_URL
+# استفاده از /dev/tty برای اطمینان از اینکه حتی با دستور curl هم کیبورد خوانده شود
+read -p "Enter GitHub Raw URL for your rules (Leave blank to skip): " GITHUB_URL </dev/tty
 
-read -p "Enter AdGuard Home Web UI Port (Default 8090): " AGH_PORT
+read -p "Enter AdGuard Home Web UI Port (Default 8090): " AGH_PORT </dev/tty
 AGH_PORT=${AGH_PORT:-8090}
 
-read -p "Enter AdGuard Home Username (Default plus98): " AGH_USER
+read -p "Enter AdGuard Home Username (Default plus98): " AGH_USER </dev/tty
 AGH_USER=${AGH_USER:-plus98}
 
-read -p "Enter AdGuard Home Password (Default plus98): " AGH_PASS
+read -p "Enter AdGuard Home Password (Default plus98): " AGH_PASS </dev/tty
 AGH_PASS=${AGH_PASS:-plus98}
 
 echo -e "\e[1;36m[1/8] Updating system and installing dependencies...\e[0m"
 apt-get update -y
 apt-get install -y curl wget nano iptables vnstat ipset bc nethogs iftop jq figlet apache2-utils
 
-# تلاش برای استخراج آی‌پی سرور از منابع مختلف
+# استخراج خودکار آی‌پی سرور
 SERVER_IP=$(curl -s4 api.ipify.org || curl -s4 icanhazip.com || curl -s4 ifconfig.me)
 
-# بررسی اینکه آیا مقدار دریافتی واقعاً یک آی‌پی معتبر است (نه صفحه HTML)
+# اگر آی‌پی پیدا نشد، از کاربر بپرسد
 if [[ ! "$SERVER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    # تلاش برای دریافت آی‌پی محلی رابط شبکه
     SERVER_IP=$(hostname -I | awk '{print $1}')
 fi
 
-# اگر باز هم آی‌پی معتبر نبود، از کاربر بپرسد
 if [[ ! "$SERVER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo -e "\e[1;31mCould not detect Server IP automatically!\e[0m"
-    read -p "Please enter your Server IP manually: " SERVER_IP
+    read -p "Please enter your Server IP manually: " SERVER_IP </dev/tty
 fi
 
 echo -e "\e[1;32mServer IP detected as: $SERVER_IP\e[0m"
@@ -442,17 +437,17 @@ echo -e "\e[1;36m====================================================\e[0m"
 
 echo -e "\e[1;33m[1] Add/Reduce GB  [2] Set Expiry Date  [3] Reset Extra
 [4] Sync Offset  [Enter] Exit\e[0m"
-read -p "Select option: " opt < /dev/tty
+read -p "Select option: " opt </dev/tty
 save_settings() {
     echo "EXTRA_GB=$EXTRA_GB" > "$SETTINGS_FILE"
     echo "EXPIRY_DATE=\"$EXPIRY_DATE\"" >> "$SETTINGS_FILE"
     echo "OFFSET=$OFFSET" >> "$SETTINGS_FILE"
 }
 case "$opt" in
-    1) read -p "Enter GB to add/reduce: " new_gb < /dev/tty; EXTRA_GB=$new_gb; save_settings; exec bash ;;
-    2) read -p "New Expiry Date (YYYY-MM-DD): " new_date < /dev/tty; EXPIRY_DATE="$new_date"; save_settings; exec bash ;;
+    1) read -p "Enter GB to add/reduce: " new_gb </dev/tty; EXTRA_GB=$new_gb; save_settings; exec bash ;;
+    2) read -p "New Expiry Date (YYYY-MM-DD): " new_date </dev/tty; EXPIRY_DATE="$new_date"; save_settings; exec bash ;;
     3) EXTRA_GB=0; OFFSET=0; save_settings; exec bash ;;
-    4) read -p "Current Offset is $OFFSET. Enter adjustment: " adjust < /dev/tty; OFFSET=$(echo "scale=2; $OFFSET + $adjust" | bc); save_settings; exec bash ;;
+    4) read -p "Current Offset is $OFFSET. Enter adjustment: " adjust </dev/tty; OFFSET=$(echo "scale=2; $OFFSET + $adjust" | bc); save_settings; exec bash ;;
 esac
 EOF
 chmod +x /root/traffic.sh
