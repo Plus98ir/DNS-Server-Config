@@ -39,18 +39,35 @@ You can install and run the setup script using `curl`:
 ```bash
 bash <(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/download/v1.0.0/install.sh)
 ```
-After the installation is complete, your AdGuard address is:
-http://yourip:8090
-becuse its custom config
-and you can configure your AdGuard there.
+"During installation, you will be asked to provide the following details for AdGuard Home:
 
-📜 Default Routing Rules
-During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use my default optimized list by pasting this link when prompted:
+URL (for the rules)
+
+Port
+
+Username and Password
+
+Note: I recommend using my link for the rules. It is a complete anti-sanction list that is constantly updated."
 
 ```txt
 https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
 
 ```
+<img width="960" height="161" alt="image" src="https://github.com/user-attachments/assets/de6a8be4-1acb-446e-a9fa-7e722a9415e2" />
+
+---
+After the installation is complete, your AdGuard address is:
+http://your-ip:port
+
+**Note:** Since this is a custom configuration
+further changes and configurations can be done directly in the /opt/AdGuardHome/AdGuardHome.yaml file
+
+---
+
+📜 Default Routing Rules
+During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use my default optimized list by pasting this link when prompted:
+
+
 * **Available Commands After Install** (Aliases):
 ---
 Type **menu** anywhere in the terminal to open the interactive management panel.
