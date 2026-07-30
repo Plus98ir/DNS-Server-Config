@@ -87,7 +87,6 @@ https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
 
 کلمه hajm را تایپ کنید تا مصرف دقیق پهنای باند را مشاهده کرده و سهمیه ترافیک را مدیریت کنید.
 
----
 
 <img width="412" height="272" alt="image" src="https://github.com/user-attachments/assets/fa59b82b-9789-4f11-ae99-4ebec481be3c" />
 
