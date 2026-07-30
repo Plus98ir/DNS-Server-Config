@@ -629,19 +629,45 @@ while true; do
         9) 
            while true; do
                clear
-               echo -e "${RED}==============================================${NC}"
-               echo -e "${RED}             MANAGE BLACKLIST                 ${NC}"
-               echo -e "${RED}==============================================${NC}"
-               echo -e "1) ${CYAN}Show Blacklisted IPs${NC}"
+               echo -e "${RED}==============================================================${NC}"
+               echo -e "${RED}             MANAGE BLACKLIST (ISP & LOCATION)                ${NC}"
+               echo -e "${RED}==============================================================${NC}"
+               echo -e "1) ${CYAN}Show Blacklisted IPs (with ISP & Country)${NC}"
                echo -e "2) ${RED}Add IP to Blacklist${NC}"
                echo -e "3) ${GREEN}Remove IP from Blacklist${NC}"
                echo -e "4) ${YELLOW}Back to Main Menu${NC}"
-               echo -e "${RED}----------------------------------------------${NC}"
+               echo -e "${RED}--------------------------------------------------------------${NC}"
                read -p "Select an option [1-4]: " bl_opt
                case $bl_opt in
                    1) 
-                      echo -e "\n${YELLOW}Current Banned IPs:${NC}"
-                      ipset list blacklist | grep -E "^[0-9]" || echo -e "${GREEN}The blacklist is empty.${NC}"
+                      echo -e "\n${YELLOW}Fetching IP details... Please wait.${NC}"
+                      banned_ips=$(ipset list blacklist 2>/dev/null | grep -E "^[0-9]")
+                      if [ -z "$banned_ips" ]; then
+                          echo -e "${GREEN}The blacklist is empty.${NC}"
+                      else
+                          echo -e "${BLUE}------------------------------------------------------------------------------${NC}"
+                          printf "${CYAN}%-16s | %-14s | %-22s | %-12s${NC}\n" "IP Address" "Country" "ISP / Operator" "City"
+                          echo -e "${BLUE}------------------------------------------------------------------------------${NC}"
+                          while read -r line; do
+                              ip=$(echo "$line" | awk '{print $1}')
+                              
+                              # اضافه کردن فیلتر isp به درخواست
+                              loc_data=$(curl -s --connect-timeout 2 "http://ip-api.com/json/$ip?fields=status,country,city,isp")
+                              
+                              if [[ "$loc_data" == *"\"status\":\"success\""* ]]; then
+                                  country=$(echo "$loc_data" | jq -r '.country' | cut -c1-14)
+                                  city=$(echo "$loc_data" | jq -r '.city' | cut -c1-12)
+                                  isp=$(echo "$loc_data" | jq -r '.isp' | cut -c1-22)
+                              else
+                                  country="Unknown"
+                                  city="Unknown"
+                                  isp="Unknown"
+                              fi
+                              
+                              printf "${RED}%-16s${NC} | ${YELLOW}%-14s${NC} | ${GREEN}%-22s${NC} | ${PURPLE}%-12s${NC}\n" "$ip" "$country" "$isp" "$city"
+                          done <<< "$banned_ips"
+                          echo -e "${BLUE}------------------------------------------------------------------------------${NC}"
+                      fi
                       echo ""
                       read -p "Press Enter to return..." 
                       ;;
