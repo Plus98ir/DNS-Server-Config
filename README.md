@@ -48,7 +48,9 @@ https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
 
 ```
 Port
+
 Username and Password
+
 Note: I recommend using my link for the rules. It is a complete anti-sanction list that is constantly updated."
 
 
