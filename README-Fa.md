@@ -2,7 +2,7 @@
 
 # 🌍 راه‌اندازی DNS سرور شخصی و مسیریابی
 
-[🇺🇸 English](/DNS-Server-Config/) | **🇮🇷 فارسی**
+[🇺🇸 English](index.html) | **🇮🇷 فارسی**
 
 </div>
 
