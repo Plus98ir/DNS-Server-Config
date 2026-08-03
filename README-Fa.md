@@ -1,11 +1,10 @@
 <div align="center">
 
-# 🌍 Personal DNS Server Setup & Routing Script
+# 🌍 راه‌اندازی DNS سرور شخصی و مسیریابی
 
-**us English** | [IR فارسی](README-Fa.md)
+[us English](README.md) | **IR فارسی**
 
 </div>
-
 
 ---
 
