@@ -3,7 +3,7 @@
 
 # 🌍 راه‌اندازی DNS سرورشخصی و مسیریابی
 <b>🇺🇸 English</b> |
-<a href="README-Fa.md"><b>🇮🇷 فارسی</b></a>
+<a href="README.md"><b>🇮🇷 فارسی</b></a>
 
 </div>
 ---
