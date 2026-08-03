@@ -1,7 +1,9 @@
 <div align="center">
 
+
 # 🌍 راه‌اندازی DNS سرورشخصی و مسیریابی
-### [🇺🇸 English Documentation](./README.md) | [🇮🇷 توضیحات مستندات فارسی](./README-fa.md)
+<b>🇺🇸 English</b> |
+<a href="README-Fa.md"><b>🇮🇷 فارسی</b></a>
 
 </div>
 
