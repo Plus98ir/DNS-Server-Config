@@ -2,8 +2,8 @@
 
 
 # 🌍 راه‌اندازی DNS سرورشخصی و مسیریابی
-<b>🇺🇸 English</b> |
-<a href="README.md"><b>🇮🇷 فارسی</b></a>
+<a href="README.md"><b>🇺🇸 English</b></a> |
+<b>🇮🇷 فارسی</b>
 
 </div>
 ---
