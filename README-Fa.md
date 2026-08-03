@@ -2,9 +2,10 @@
 
 # 🌍 راه‌اندازی DNS سرور شخصی و مسیریابی
 
-[🇺🇸 English](README.md) | [🇮🇷 فارسی](README-Fa.md)
+[🇺🇸 us English](README.md) | [🇮🇷 IR فارسی](README-Fa.md)
 
 </div>
+
 
 ---
 
