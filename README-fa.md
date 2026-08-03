@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌍 اسکریپت جامع راه‌اندازی سرور و مسیریابی
+# 🌍 راه‌اندازی DNS سرورشخصی و مسیریابی
 ### [🇺🇸 English Documentation](./README.md) | [🇮🇷 توضیحات مستندات فارسی](./README-fa.md)
 
 </div>
