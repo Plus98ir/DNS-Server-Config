@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🌍 راه‌اندازی DNS سرور شخصی و مسیریابی
+# 🌍 Personal DNS Server Setup & Routing Script
 
-[🇺🇸 English](index.html) | **🇮🇷 فارسی**
+**us English** | [IR فارسی](README-Fa.md)
 
 </div>
 
