@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌍 Ultimate Server Setup & Routing Script
+# 🌍 Personal DNS Server Setup & Routing Script
 ### [🇺🇸 English Documentation](./README.md) | [🇮🇷 توضیحات مستندات فارسی](./README-fa.md)
 
 </div>
