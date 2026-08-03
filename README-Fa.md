@@ -1,4 +1,5 @@
-<div align="center">
+<div dir="rtl">
+
 
 # 🌍 راه‌اندازی DNS سرور شخصی و مسیریابی
 
