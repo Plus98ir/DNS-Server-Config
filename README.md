@@ -39,7 +39,7 @@ When you run this script, it automatically performs the following tasks:
    * Sets up a cronjob to update this list automatically every 12 hours.
 ---
 7. **Traffic Quota Management & CLI Tools:**
-   * **`traffic.sh` (`hajm`)**: Calculates precise bandwidth usage, remaining quotas, and handles monthly resets.
+* **`traffic.sh` (`hajm`)**: Calculates precise bandwidth usage, remaining quotas, and handles monthly resets.
 
 
 
