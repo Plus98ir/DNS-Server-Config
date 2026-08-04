@@ -156,6 +156,9 @@ Then you will get your certificate paths like this:
 
 Then go to **Settings > Encryption** like the picture.
 
+<img width="1085" height="1321" alt="image" src="https://github.com/user-attachments/assets/6abdb7b6-a8f7-467c-8806-04ac50f5a890" />
+
+
 **Note:** If you have another service on port 443, be careful and don't use port 443 for DoH. Use another port. If you use a different port, your DoH address will look like this:
 ```
 https://yourdomain.com:8443/dns-query/yourclientname
