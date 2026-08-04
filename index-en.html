@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Personal DNS Server Setup & Routing Script</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown-dark.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+        .markdown-body {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="markdown-body">
+        <h1>🌍 Personal DNS Server Setup & Routing Script</h1>
+        
+        <p>
+            <strong>🇺🇸 English</strong> | <a href="README-Fa.html">🇮🇷 فارسی</a>
+        </p>
+
+        <hr>
+
+        <h2>🇺🇸 English Documentation</h2>
+
+        <h3>📌 Overview</h3>
+        <p><strong>Important Note:</strong> Please be very careful when entering your password. If you enter the incorrect password twice, the system will automatically block your device's IP (the computer or phone you are using).</p>
+        <p>This script is an <strong>All-in-One Automated Setup</strong> for creating a secure, high-performance routing server. It automatically installs and configures essential tools for traffic routing, DNS management, and access control.</p>
+
+        <h3>🚀 Features & What It Does</h3>
+        <p>When you run this script, it automatically performs the following tasks:</p>
+        <ol>
+            <li><strong>System Update & Dependencies:</strong> Updates the OS and installs required packages (<code>curl</code>, <code>wget</code>, <code>iptables</code>, <code>vnstat</code>, <code>ipset</code>, <code>iftop</code>, <code>nethogs</code>, <code>jq</code>, etc.).</li>
+            <li><strong>Network Optimization (BBR):</strong> Enables and configures TCP BBR and <code>fq</code> qdisc for optimal network congestion control and speed.</li>
+            <li><strong>X-UI (Sanaei) Installation:</strong> Automatically detects and installs the 3X-UI panel for proxy management if it's not already present.</li>
+            <li><strong>AdGuard Home Configuration:</strong>
+                <ul>
+                    <li>Installs AdGuard Home with a customized public configuration (Bind IP: <code>0.0.0.0</code>).</li>
+                    <li>Optimizes cache sizes, disables unnecessary logging, and secures the DNS from public abuse.</li>
+                </ul>
+            </li>
+            <li><strong>Dynamic Access Control (IPSet & IPTables):</strong>
+                <ul>
+                    <li><strong><code>restore_rules.sh</code></strong>: Rebuilds NAT and Mangle rules on boot to forward authorized traffic directly to local X-UI ports.</li>
+                    <li><strong><code>adguard-monitor.sh</code></strong>: Scans AdGuard Home logs for new client IPs and dynamically adds them to an <code>allowed_users</code> IPSet with a 1-hour timeout.</li>
+                </ul>
+            </li>
+            <li><strong>GitHub Rules Auto-Updater:</strong>
+                <ul>
+                    <li>Automatically fetches your clean domain list from GitHub, ignores <code>#</code> comments, and appends <code>$dnsrewrite=[YOUR_SERVER_IP]</code>.</li>
+                    <li>Sets up a cronjob to update this list automatically every 12 hours.</li>
+                </ul>
+            </li>
+            <li><strong>Traffic Quota Management & CLI Tools:</strong>
+                <ul>
+                    <li><strong><code>traffic.sh</code> (<code>hajm</code>)</strong>: Calculates precise bandwidth usage, remaining quotas, and handles monthly resets.</li>
+                    <li><strong><code>display.sh</code></strong>: Shows a beautiful ASCII banner with remaining traffic automatically upon SSH login.</li>
+                    <li><strong><code>panel.sh</code> (<code>menu</code>)</strong>: An interactive CLI menu to view active users, monitor bandwidth, manage blocklists, and restart services.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p><strong>Note:</strong> Before proceeding with the installation, ensure that port 53 on the server is not occupied by another service. Open the relevant configuration file, uncomment the line <code>DNSStubListener=yes</code>, and change it to <code>DNSStubListener=no</code>.</p>
+
+        <pre><code class="language-bash">nano /etc/systemd/resolved.conf</code></pre>
+
+        <p>Then, restart systemd-resolved.service and proceed with the installation.</p>
+
+        <pre><code class="language-bash">systemctl restart systemd-resolved.service</code></pre>
+
+        <h3>🛠 Installation & Usage</h3>
+        <p>You can install and run the setup script using <code>curl</code>:</p>
+
+        <pre><code class="language-bash">bash &lt;(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/latest/download/install.sh)</code></pre>
+
+        <p>During installation, you will be asked to provide the following details for AdGuard Home:</p>
+
+        <p><strong>URL (for the rules)</strong></p>
+        <pre><code>https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt</code></pre>
+
+        <p><strong>Port</strong></p>
+        <p><strong>Username and Password</strong></p>
+
+        <p><strong>Note:</strong> I recommend using my link for the rules. It is a complete anti-sanction list that is constantly updated.</p>
+
+        <p>After the installation is complete, your AdGuard address is:</p>
+        <pre><code>http://your-ip:port</code></pre>
+
+        <p><strong>Note:</strong> Since this is a custom configuration, further changes and configurations can be done directly in the <code>/opt/AdGuardHome/AdGuardHome.yaml</code> file</p>
+
+        <hr>
+
+        <h3>📜 Default Routing Rules</h3>
+        <p>During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use my default optimized list by pasting the link when prompted.</p>
+
+        <p>If you are using custom routing rules, you must execute the following command in your terminal after providing the rules URL:</p>
+
+        <pre><code class="language-bash">/root/update-adguard.sh</code></pre>
+
+        <p>Navigate to <strong>Filters &gt; DNS blocklists</strong>, and click the blue <strong>Check for updates</strong> button.</p>
+
+        <hr>
+
+        <h3>Available Commands After Install (Aliases)</h3>
+        <p>Type <strong><code>menu</code></strong> anywhere in the terminal to open the interactive management panel. Here you can choose what you want to do.</p>
+
+        <hr>
+
+        <p>Type <strong><code>hajm</code></strong> to view detailed bandwidth usage and manage traffic quotas. You can adjust and set it by your server's default time and GB.</p>
+
+        <hr>
+
+        <h3>⚙️ Important Post-Installation Steps (X-UI Configuration)</h3>
+        <p>The only thing you need to do after the installation is to configure the X-UI Sanaei panel as follows:</p>
+        <ol>
+            <li>Create two new Inbounds of type <strong>Tunnel</strong>.</li>
+            <li>Set the listening address (Listen IP) for both to <code>127.0.0.1</code>. Configure the first one on port 443 and the second one on port 80.</li>
+            <li>For both Inbounds, ensure that Sniffing is enabled, and explicitly check the quic, http, and tls options.</li>
+            <li>Finally, go to the Routing Rules section in the Sanaei panel. Route these two inbounds to an Outbound (preferably, a REALITY config connected to your foreign server under current network conditions).</li>
+        </ol>
+
+        <h3>🔒 How to Authorize Users (Wildcard Setup & Clients)</h3>
+        <p>To prevent your server from being used as an Open Resolver and to give each user private access, you must configure Client IDs using a Wildcard domain.</p>
+
+        <h4>Get a Wildcard Domain</h4>
+        <p>In your domain's DNS manager (e.g., Cloudflare), create an A record with the name <code>*</code> (Wildcard) pointing to your Server IP. Ensure you have a Wildcard SSL certificate (e.g., <code>*.yourdomain.com</code>).</p>
+
+        <p>You can use Certbot. First, you need to install <strong>certbot</strong>:</p>
+        <pre><code class="language-bash">apt install certbot</code></pre>
+
+        <p>Then run the command to get the certificate:</p>
+        <pre><code class="language-bash">certbot certonly \
+--manual \
+--preferred-challenges dns \
+-d "*.yourdomain.com" \
+-d "yourdomain.com"</code></pre>
+
+        <p>You need to add 2 records as text in your Cloudflare; follow the steps provided by Certbot.</p>
+
+        <p>Then you will get your certificate paths like this:</p>
+        <pre><code>/etc/letsencrypt/live/yourdomain.com/fullchain.pem</code></pre>
+        <pre><code>/etc/letsencrypt/live/yourdomain.com/privkey.pem</code></pre>
+
+        <p>Then go to <strong>Settings &gt; Encryption</strong> like the picture.</p>
+
+        <p><strong>Note:</strong> If you have another service on port 443, be careful and don't use port 443 for DoH. Use another port. If you use a different port, your DoH address will look like this:</p>
+        <pre><code>https://yourdomain.com:8443/dns-query/yourclientname</code></pre>
+
+        <hr>
+
+        <h4>Add Clients in AdGuard Home</h4>
+        <ol>
+            <li>Go to the AdGuard Home Web Panel.</li>
+            <li>Navigate to <strong>Settings &gt; Client Settings</strong> and click <strong>Add Client</strong>.</li>
+            <li>Enter a Name for the user (e.g., Sadeq-Pc).</li>
+            <li>In the Identifiers field, type a unique Client ID (e.g., sadeqpc1).</li>
+            <li>Save the client.</li>
+        </ol>
+
+        <h4>Connecting the User</h4>
+        <p>The user can now connect securely using DoT or DoH. AdGuard will recognize them via the identifier:</p>
+
+        <p><strong>DoT:</strong> <code>tls://yourclientname.yourdomain.com</code></p>
+        <p><strong>DoH:</strong> <code>https://yourdomain.com/dns-query/yourclientname</code></p>
+
+        <p><strong>Recommend using a special id like <code>67ca2c09</code> for any client</strong></p>
+
+        <p>Now your client should use it like this:</p>
+        <p><strong>DoT:</strong> <code>tls://67ca2c09.yourdomain.com</code></p>
+        <p><strong>DoH:</strong> <code>https://yourdomain.com/dns-query/yourclientname</code></p>
+
+        <p>The User ID is important, but by name, you can recognize who connected to your server in the AdGuard Home log manager.</p>
+
+        <hr>
+
+        <p>If you run into any issues, feel free to contact me on Telegram. I will get back to you as soon as possible.</p>
+        <pre><code>@PlusNE</code></pre>
+    </div>
+</body>
+</html>
