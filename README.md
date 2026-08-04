@@ -42,7 +42,7 @@ When you run this script, it automatically performs the following tasks:
 * **`traffic.sh` (`hajm`)**: Calculates precise bandwidth usage, remaining quotas, and handles monthly resets.
 
 
-   <img width="413" height="257" alt="image" src="https://github.com/user-attachments/assets/32999464-9c7f-4e91-b959-f9786b319766" />
+<img width="413" height="257" alt="image" src="https://github.com/user-attachments/assets/32999464-9c7f-4e91-b959-f9786b319766" />
 
 ---
 
