@@ -40,18 +40,23 @@ When you run this script, it automatically performs the following tasks:
 ---
 7. **Traffic Quota Management & CLI Tools:**
    * **`traffic.sh` (`hajm`)**: Calculates precise bandwidth usage, remaining quotas, and handles monthly resets.
-     
+
+
    <img width="413" height="257" alt="image" src="https://github.com/user-attachments/assets/32999464-9c7f-4e91-b959-f9786b319766" />
-  
+
+   
 ---
 
    * **`display.sh`**: Shows a beautiful ASCII banner with remaining traffic automatically upon SSH login.
+
 
    <img width="402" height="226" alt="image" src="https://github.com/user-attachments/assets/d4aedb0e-7836-4e8a-a135-7abc95b9259f" />
 
 ---
 
    * **`panel.sh` (`menu`)**: An interactive CLI menu to view active users, monitor bandwidth, manage blocklists, and restart services.
+
+
   
    <img width="360" height="282" alt="image" src="https://github.com/user-attachments/assets/9bc20405-27d6-458b-9e78-bf7fa0f1d710" />
 
