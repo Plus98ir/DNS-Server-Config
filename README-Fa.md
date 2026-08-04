@@ -1,3 +1,8 @@
+ <p align="center">
+  <a href="https://Plus98ir.github.io">
+    <img src="https://img.shields.io/badge/Website-Plus98ir.github.io-blue?style=for-the-badge&logo=google-chrome" alt="Web Page">
+  </a>
+</p>
 # 🌍 راه‌اندازی DNS سرور شخصی و مسیریابی
 
 [us English](README.md) | **IR فارسی**
