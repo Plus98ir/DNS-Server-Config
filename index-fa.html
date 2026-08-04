@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="fa">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌍 راه‌اندازی DNS سرور شخصی و مسیریابی</title>
+    <title>🌍 راه‌اندازی سرور DNS شخصی و اسکریپت مسیریابی</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown-dark.css">
     <style>
         body {
-            font-family: Tahoma, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #0d1117;
@@ -16,27 +16,8 @@
         .markdown-body {
             max-width: 900px;
             margin: 0 auto;
-            direction: rtl !important;
-            text-align: right !important;
         }
-        /* اعمال زور برای راست‌چین کردن تمام عناصر گیت‌هاب */
-        .markdown-body p, .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body ul, .markdown-body ol, .markdown-body li, .markdown-body blockquote {
-            text-align: right !important;
-            direction: rtl !important;
-        }
-        .markdown-body ul, .markdown-body ol {
-            padding-right: 2em !important;
-            padding-left: 0 !important;
-        }
-        .markdown-body blockquote {
-            border-right: 4px solid #30363d !important;
-            border-left: none !important;
-            padding-right: 1em !important;
-            padding-left: 0 !important;
-            margin-right: 0 !important;
-            color: #8b949e;
-        }
-        /* استایل دکمه‌های زبان */
+        /* استایل دکمه‌های زبان شبیه نسخه فارسی */
         .lang-switcher table {
             width: auto;
             margin-bottom: 20px;
@@ -57,15 +38,15 @@
     
 <body>
     <div class="markdown-body">
-        <h1>🌍 راه‌اندازی DNS سرور شخصی و مسیریابی</h1>
+        <h1>🌍 راه‌اندازی سرور DNS شخصی و اسکریپت مسیریابی</h1>
         
         <!-- کادر زبان‌ها -->
         <div class="lang-switcher">
             <table>
                 <tbody>
                     <tr>
-                        <td><a href="index.html">us English</a></td>
-                        <td><strong>IR فارسی</strong></td>
+                        <td><a href="index.html">🇺🇸 us English</a></td>
+                        <td><strong>🇮🇷 IR فارسی</strong></td>
                     </tr>
                 </tbody>
             </table>
@@ -73,89 +54,179 @@
 
         <hr>
 
-        <h2>🇮🇷 راهنمای فارسی</h2>
+        <h2>🇮🇷 مستندات فارسی</h2>
 
-        <h3>📌 معرفی</h3>
+        <h3>📌 نمای کلی</h3>
+        <p><strong>نکته مهم:</strong> لطفاً هنگام وارد کردن رمز عبور بسیار دقت کنید. اگر رمز عبور را دو بار اشتباه وارد کنید، سیستم به‌طور خودکار IP دستگاه شما (کامپیوتر یا گوشی که استفاده می‌کنید) را مسدود خواهد کرد.</p>
+        <p>این اسکریپت یک <strong>راه‌اندازی خودکار همه‌کاره (All-in-One)</strong> برای ساخت یک سرور مسیریابی امن و با کارایی بالا است. این ابزار به‌طور خودکار ابزارهای ضروری برای مسیریابی ترافیک، مدیریت DNS و کنترل دسترسی را نصب و پیکربندی می‌کند.</p>
 
-        <p><strong>توجه مهم:</strong> هنگام وارد کردن رمز عبور نهایت دقت را داشته باشید. در صورت دو مرتبه ورود ناموفق، سیستم به‌طور خودکار آی‌پی دستگاه شما (رایانه یا تلفن‌همراهی که استفاده می‌کنید) را مسدود خواهد کرد.</p>
-
-        <p>این اسکریپت یک نصاب و راه‌انداز خودکار (All-in-One) برای ایجاد یک سرور مسیریابی امن و پرسرعت است. این ابزار به‌طور خودکار ابزارهای ضروری برای مسیریابی ترافیک، مدیریت DNS و کنترل دسترسی را نصب و پیکربندی می‌کند.</p>
-
-        <h3>🚀 ویژگی‌ها و عملکردهای اسکریپت</h3>
-
-        <p>هنگام اجرای این اسکریپت، وظایف زیر به‌طور خودکار انجام می‌شوند:</p>
-
+        <h3>🚀 ویژگی‌ها و عملکرد اسکریپت</h3>
+        <p>وقتی این اسکریپت را اجرا می‌کنید، کارهای زیر را به‌صورت خودکار انجام می‌دهد:</p>
         <ol>
-            <li><strong>آپدیت سیستم و پیش‌نیازها:</strong> سیستم‌عامل را به‌روزرسانی کرده و پکیج‌های مورد نیاز (<code>curl</code>, <code>wget</code>, <code>iptables</code>, <code>vnstat</code>, <code>ipset</code>, <code>iftop</code>, <code>nethogs</code>, <code>jq</code> و غیره) را نصب می‌کند.</li>
-
-            <li><strong>بهینه‌سازی شبکه (BBR):</strong> الگوریتم TCP BBR و <code>fq_qdisc</code> را برای کنترل بهینه ترافیک شبکه و افزایش سرعت، فعال و پیکربندی می‌کند.</li>
-
-            <li><strong>نصب X-UI (ثنایی):</strong> در صورتی که پنل 3X-UI از قبل نصب نباشد، به‌طور خودکار آن را برای مدیریت پروکسی‌ها نصب می‌کند.</li>
-
-            <li><strong>پیکربندی AdGuard Home:</strong>
+            <li><strong>به‌روزرسانی سیستم و وابستگی‌ها:</strong> سیستم‌عامل را آپدیت کرده و پکیج‌های مورد نیاز (مانند <code>curl</code>، <code>wget</code>، <code>iptables</code>، <code>vnstat</code>، <code>ipset</code>، <code>iftop</code>، <code>nethogs</code>، <code>jq</code> و غیره) را نصب می‌کند.</li>
+            <li><strong>بهینه‌سازی شبکه (BBR):</strong> پروتکل TCP BBR و <code>fq</code> qdisc را برای کنترل ازدحام و سرعت بهینه شبکه فعال و تنظیم می‌کند.</li>
+            <li><strong>نصب X-UI (صناعی):</strong> پنل 3X-UI را برای مدیریت پروکسی‌ها شناسایی و در صورت عدم حضور، به‌صورت خودکار نصب می‌کند.</li>
+            <li><strong>پیکربندی ادگارد هوم (AdGuard Home):</strong>
                 <ul>
-                    <li>نصب <strong>AdGuard Home</strong> با یک کانفیگ عمومی سفارشی‌سازی‌شده (Bind IP: <code>0.0.0.0</code>).</li>
-                    <li>بهینه‌سازی حجم کش، غیرفعال‌سازی لاگ‌های غیرضروری و ایمن‌سازی DNS در برابر سوءاستفاده‌های عمومی.</li>
+                    <li>ادگارد هوم را با تنظیمات عمومی سفارشی (Bind IP: <code>0.0.0.0</code>) نصب می‌کند.</li>
+                    <li>حجم کش را بهینه‌سازی کرده، لاگ‌های غیرضروری را غیرفعال می‌کند و DNS را در برابر سوءاستفاده عمومی ایمن می‌سازد.</li>
                 </ul>
             </li>
-
             <li><strong>کنترل دسترسی پویا (IPSet و IPTables):</strong>
                 <ul>
-                    <li><strong>اسکریپت <code>restore_rules.sh</code>:</strong> بازسازی قوانین NAT و Mangle در زمان ریبوت سیستم تا ترافیک مجاز مستقیماً به پورت‌های X-UI محلی هدایت شود.</li>
-                    <li><strong>اسکریپت <code>adguard-monitor.sh</code>:</strong> اسکن لاگ‌های AdGuard Home برای یافتن آی‌پی کلاینت‌های جدید و افزودن پویای آن‌ها به IPSet با timeout ۱ ساعت.</li>
+                    <li><strong><code>restore_rules.sh</code></strong>: قوانین NAT و Mangle را هنگام بوت سیستم بازسازی می‌کند تا ترافیک مجاز مستقیماً به پورت‌های محلی X-UI هدایت شود.</li>
+                    <li><strong><code>adguard-monitor.sh</code></strong>: لاگ‌های ادگارد هوم را برای یافتن IP‌های جدید کلاینت اسکن کرده و آن‌ها را با انقضای ۱ ساعته به یک IPSet به نام <code>allowed_users</code> اضافه می‌کند.</li>
                 </ul>
             </li>
-
-            <li><strong>آپدیت خودکار قوانین از گیت‌هاب:</strong>
+            <li><strong>به‌روزرسان خودکار قوانین گیت‌هاب:</strong>
                 <ul>
-                    <li>دریافت خودکار لیست دامنه‌های تمیز شما از گیت‌هاب، نادیده گرفتن کامنت‌های <code>#</code> و اضافه کردن <code>$dnsrewrite=[YOUR_SERVER_IP]</code> به آن‌ها.</li>
-                    <li>تنظیم یک کرون‌جاب (cronjob) برای به‌روزرسانی خودکار این لیست هر ۱۲ ساعت یک‌بار.</li>
+                    <li>لیست دامنه‌های تمیز شما را از گیت‌هاب دریافت کرده، کامنت‌های <code>#</code> را نادیده می‌گیرد و عبارت <code>$dnsrewrite=[YOUR_SERVER_IP]</code> را به آن‌ها اضافه می‌کند.</li>
+                    <li>یک کرون‌جاب (Cronjob) تنظیم می‌کند تا این لیست هر ۱۲ ساعت یک‌بار به‌طور خودکار آپدیت شود.</li>
                 </ul>
             </li>
-
-            <li><strong>مدیریت حجم ترافیک و ابزارهای خط فرمان (CLI):</strong>
+            <li><strong>مدیریت حجم ترافیک و ابزارهای CLI:</strong>
                 <ul>
-                    <li><strong>اسکریپت <code>traffic.sh</code> (دستور <code>hajm</code>):</strong> محاسبه دقیق مصرف پهنای باند، سهمیه باقی‌مانده و انجام ریست‌های ماهانه.</li>
-                    <li><strong>اسکریپت <code>display.sh</code>:</strong> نمایش یک بنر متنی (ASCII) زیبا از ترافیک باقی‌مانده به‌صورت خودکار هنگام ورود به SSH.</li>
-                    <li><strong>اسکریپت <code>panel.sh</code> (دستور <code>menu</code>):</strong> یک منوی تعاملی در خط فرمان برای مشاهده کاربران فعال، نظارت بر پهنای باند، مدیریت بلک‌لیست‌ها و ریستارت سرویس‌ها.</li>
+                    <li><strong><code>traffic.sh</code> (<code>hajm</code>)</strong>: میزان دقیق مصرف پهنای باند، سهمیه باقیمانده را محاسبه کرده و ریست‌های ماهانه را مدیریت می‌کند.</li>
+                    
+                    <p align="center">
+  <img src="https://github.com/Plus98ir/DNS-Server-Config/blob/main/traffic.png?raw=true?raw=true" alt="Tutorial Image" width="300">
+</p>
+
+                    <li><strong><code>display.sh</code></strong>: یک بنر زیبای ASCII به همراه حجم ترافیک باقیمانده را بلافاصله پس از ورود به SSH نمایش می‌دهد.</li>
+                    
+<p align="center">
+  <img src="https://github.com/Plus98ir/DNS-Server-Config/blob/main/beua_traffic.png?raw=true" alt="Tutorial Image" width="300">
+</p>
+
+                    <li><strong><code>panel.sh</code> (<code>menu</code>)</strong>: یک منوی تعاملی خط فرمان (CLI) برای مشاهده کاربران فعال، مانیتورینگ پهنای باند، مدیریت لیست‌های مسدودسازی و ری‌استارت سرویس‌ها.</li>
+                    
+<p align="center">
+  <img src="https://github.com/Plus98ir/DNS-Server-Config/blob/main/panel.png?raw=true" alt="Tutorial Image" width="300">
+</p>
+
                 </ul>
             </li>
         </ol>
 
-        <p><strong>توجه:</strong> پیش از اقدام به نصب، اطمینان حاصل کنید که پورت ۵۳ سرور توسط سرویس دیگری اشغال نشده باشد.</p>
-
-        <p>فایل تنظیمات مربوطه را باز کرده، عبارت <code>DNSStubListener=yes</code> را از حالت کامنت خارج کنید و آن را به مقدار <code>DNSStubListener=no</code> تغییر دهید:</p>
+        <p><strong>نکته:</strong> پیش از شروع نصب، مطمئن شوید که پورت 53 روی سرور توسط سرویس دیگری اشغال نشده باشد. فایل کانفیگ مربوطه را باز کنید، خط <code>DNSStubListener=yes</code> را از حالت کامنت خارج کرده و آن را به <code>DNSStubListener=no</code> تغییر دهید.</p>
 
         <pre><code class="language-bash">nano /etc/systemd/resolved.conf</code></pre>
 
-        <p>سپس <code>systemd-resolved.service</code> را ریستارت کنید و اقدام به نصب نمایید:</p>
+        <p>سپس سرویس systemd-resolved.service را ری‌استارت کرده و مراحل نصب را ادامه دهید.</p>
 
         <pre><code class="language-bash">systemctl restart systemd-resolved.service</code></pre>
 
-        <h3>🛠 آموزش نصب و استفاده</h3>
-
-        <p>می‌توانید اسکریپت نصب را با استفاده از <code>curl</code> اجرا کنید:</p>
+        <h3>🛠 نصب و استفاده</h3>
+        <p>شما می‌توانید اسکریپت نصب را با استفاده از دستور <code>curl</code> اجرا کنید:</p>
 
         <pre><code class="language-bash">bash &lt;(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/latest/download/install.sh)</code></pre>
 
-        <p>در طول فرآیند نصب، از شما خواسته می‌شود تا اطلاعات زیر را برای AdGuard Home وارد کنید:</p>
+        <p>در طول نصب، از شما خواسته می‌شود اطلاعات زیر را برای ادگارد هوم وارد کنید:</p>
 
-        <p><strong>آدرس لینک (URL) (برای رول‌ها)</strong></p>
-
+        <p><strong>آدرس لینک قوانین (URL)</strong></p>
         <pre><code>https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt</code></pre>
 
-        <p><strong>پورت (Port)</strong></p>
+        <p><strong>پورت</strong></p>
+        <p><strong>نام کاربری و رمز عبور</strong></p>
 
-        <p><strong>نام کاربری (Username) و رمز عبور (Password)</strong></p>
+        <p><strong>نکته:</strong> پیشنهاد می‌کنم از لینک من برای قوانین استفاده کنید. این یک لیست کامل ضد تحریم است که به صورت مداوم به‌روزرسانی می‌شود.</p>
 
-        <p><strong>نکته:</strong> پیشنهاد می‌کنم برای رول‌ها از لینک اختصاصی من استفاده کنید. این یک لیست کامل برای دور زدن تحریم‌ها است که به‌طور مستمر به‌روزرسانی می‌شود.</p>
-
-        <p>پس از اتمام نصب، آدرس AdGuard شما به این شکل است:</p>
-
+        <p>پس از اتمام نصب، آدرس پنل ادگارد شما به این شکل خواهد بود:</p>
         <pre><code>http://your-ip:port</code></pre>
 
-        <p><strong>نکته:</strong> از آنجایی که این یک کانفیگ شخصی‌سازی‌شده است، تغییرات و تنظیمات بیشتر را می‌توانید مستقیماً در فایل <code>/opt/AdGuardHome/AdGuardHome.yaml</code> انجام دهید.</p>
+        <p><strong>نکته:</strong> از آنجایی که این یک کانفیگ سفارشی است، تغییرات و تنظیمات بیشتر را می‌توانید مستقیماً در فایل <code>/opt/AdGuardHome/AdGuardHome.yaml</code> انجام دهید.</p>
 
+        <hr>
+
+        <h3>📜 قوانین پیش‌فرض مسیریابی</h3>
+        <p>در حین نصب، اسکریپت آدرس گیت‌هاب را درخواست می‌کند. اگر هنوز قوانین خودتان را ندارید، می‌توانید با چسباندن لینک من در هنگام درخواست، از لیست بهینه‌شده پیش‌فرض استفاده کنید.</p>
+
+        <p>اگر از قوانین مسیریابی سفارشی استفاده می‌کنید، باید پس از ارائه لینک قوانین، دستور زیر را در ترمینال خود اجرا کنید:</p>
+
+        <pre><code class="language-bash">/root/update-adguard.sh</code></pre>
+
+        <p>به بخش <strong>Filters &gt; DNS blocklists</strong> بروید و روی دکمه آبی رنگ <strong>Check for updates</strong> کلیک کنید.</p>
+
+        <hr>
+
+        <h3>دستورات موجود پس از نصب (آلیاس‌ها)</h3>
+        <p>کلمه <strong><code>menu</code></strong> را در هر جای ترمینال تایپ کنید تا پنل مدیریت تعاملی باز شود. در آنجا می‌توانید کارهای دلخواهتان را انجام دهید.</p>
+
+        <hr>
+
+        <p>کلمه <strong><code>hajm</code></strong> را تایپ کنید تا جزئیات مصرف پهنای باند را مشاهده کرده و سهمیه ترافیک را مدیریت کنید. می‌توانید آن را بر اساس زمان پیش‌فرض سرور و گیگابایت تنظیم نمایید.</p>
+
+        <hr>
+
+        <h3>⚙️ مراحل مهم پس از نصب (پیکربندی X-UI)</h3>
+        <p>تنها کاری که باید پس از نصب انجام دهید این است که پنل صنایع (X-UI) را به صورت زیر پیکربندی کنید:</p>
+        <ol>
+            <li>دو اینباند (Inbound) جدید از نوع <strong>Tunnel</strong> ایجاد کنید.</li>
+            <li>آدرس شنود (Listen IP) برای هر دو را روی <code>127.0.0.1</code> تنظیم کنید. اولی را روی پورت 443 و دومی را روی پورت 80 قرار دهید.</li>
+            <li>برای هر دو اینباند، مطمئن شوید که Sniffing فعال است و گزینه‌های quic، http و tls را صراحتاً تیک بزنید.</li>
+            <li>در نهایت، به بخش Routing Rules در پنل صنایع بروید. این دو اینباند را به یک آوت‌باند (Outbound) هدایت کنید (ترجیحاً یک کانفیگ REALITY متصل به سرور خارج خود در شرایط فعلی شبکه).</li>
+        </ol>
+
+        <h3>🔒 نحوه احراز هویت کاربران (راه‌اندازی Wildcard و کلاینت‌ها)</h3>
+        <p>برای جلوگیری از سوءاستفاده از سرور شما به عنوان یک Open Resolver و دادن دسترسی خصوصی به هر کاربر، باید شناسه کلاینت‌ها (Client IDs) را با استفاده از یک دامنه Wildcard پیکربندی کنید.</p>
+
+        <h4>دریافت دامنه Wildcard</h4>
+        <p>در مدیر DNS دامنه خود (مثلاً کلادفلر)، یک رکورد A با نام <code>*</code> (Wildcard) ایجاد کنید که به IP سرور شما اشاره کند. مطمئن شوید که یک گواهی SSL از نوع Wildcard (مانند <code>*.yourdomain.com</code>) دارید.</p>
+
+        <p>می‌توانید از Certbot استفاده کنید. ابتدا باید <strong>certbot</strong> را نصب کنید:</p>
+        <pre><code class="language-bash">apt install certbot</code></pre>
+
+        <p>سپس دستور زیر را برای دریافت گواهی اجرا کنید:</p>
+        <pre><code class="language-bash">certbot certonly \
+--manual \
+--preferred-challenges dns \
+-d "*.yourdomain.com" \
+-d "yourdomain.com"</code></pre>
+
+        <p>ب야د ۲ رکورد را به صورت تکست (TXT) در کلادفلر اضافه کنید؛ مراحل ارائه شده توسط Certbot را دنبال کنید.</p>
+
+        <p>سپس مسیرهای گواهی‌نامه شما به این شکل دریافت خواهد شد:</p>
+        <pre><code>/etc/letsencrypt/live/yourdomain.com/fullchain.pem</code></pre>
+        <pre><code>/etc/letsencrypt/live/yourdomain.com/privkey.pem</code></pre>
+
+        <p>سپس مطابق تصویر به بخش <strong>Settings &gt; Encryption</strong> بروید.</p>
+
+        <p align="center">
+  <img src="https://github.com/Plus98ir/DNS-Server-Config/blob/main/ag1.png?raw=true" alt="Tutorial Image" width="600">
+</p>
+
+        <p><strong>نکته:</strong> اگر سرویس دیگری روی پورت 443 دارید، مراقب باشید و از پورت 443 برای DoH استفاده نکنید؛ بلکه از پورت دیگری استفاده کنید. اگر از پورت متفاوتی استفاده کنید، آدرس DoH شما به این صورت خواهد بود:</p>
+        <pre><code>https://yourdomain.com:8443/dns-query/yourclientname</code></pre>
+
+        <hr>
+
+        <h4>افزودن کلاینت‌ها در ادگارد هوم</h4>
+        <ol>
+            <li>به پنل وب ادگارد هوم بروید.</li>
+            <li>به مسیر <strong>Settings &gt; Client Settings</strong> بروید و روی <strong>Add Client</strong> کلیک کنید.</li>
+            <li>یک نام برای کاربر وارد کنید (مثلاً Sadeq-Pc).</li>
+            <li>در فیلد Identifiers، یک شناسه یکتا برای کلاینت تایپ کنید (مثلاً sadeqpc1).</li>
+            <li>کلاینت را ذخیره کنید.</li>
+        </ol>
+
+        <h4>اتصال کاربر</h4>
+        <p>اکنون کاربر می‌تواند با استفاده از DoT یا DoH به صورت امن متصل شود. ادگارد آن‌ها را از طریق شناسه شناسایی خواهد کرد:</p>
+
+        <p><strong>DoT:</strong> <code>tls://yourclientname.yourdomain.com</code></p>
+        <p><strong>DoH:</strong> <code>https://yourdomain.com/dns-query/yourclientname</code></p>
+
+        <p><strong>پیشنهاد می‌شود از یک شناسه خاص مثل <code>67ca2c09</code> برای هر کلاینت استفاده کنید</strong></p>
+
+        <p>حاکنون کلاینت شما باید به این شکل از آن استفاده کند:</p>
+        <p><strong>DoT:</strong> <code>tls://67ca2c09.yourdomain.com</code></p>
+        <p><strong>DoH:</strong> <code>https://yourdomain.com/dns-query/yourclientname</code></p>
+
+        <p>شناسه کاربر مهم است، اما با نام کاربری هم می‌توانید تشخیص دهید چه کسی به سرور شما متصل شده است (در بخش مدیریت لاگ‌های ادگارد هوم).</p>
+
+        <hr>
+
+        <p>اگر به مشکلی برخورد کردید، راحت باشید و در تلگرام با من تماس بگیرید. در اولین فرصت پاسخگوی شما خواهم بود.</p>
+        <pre><code>PlusNE@</code></pre>
     </div>
 </body>
 </html>
