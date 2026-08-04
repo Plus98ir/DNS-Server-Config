@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 راه‌اندازی DNS سرور شخصی و مسیریابی</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown-dark.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 0;
+            padding: 20px;
+            background-color: #0d1117;
+        }
+        .markdown-body {
+            max-width: 900px;
+            margin: 0 auto;
+            direction: rtl;
+            text-align: right;
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+            text-align: right;
+        }
+        .markdown-body ul, .markdown-body ol {
+            text-align: right;
+            padding-right: 2em;
+        }
+        .markdown-body blockquote {
+            border-right: 3px solid #6e40aa;
+            border-left: none;
+            padding-right: 15px;
+            padding-left: 0;
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="markdown-body">
+        <h1>🌍 راه‌اندازی DNS سرور شخصی و مسیریابی</h1>
+        
+        <p>
+            <a href="README.md">🇺🇸 us English</a> | <strong>🇮🇷 IR فارسی</strong>
+        </p>
+
+        <hr>
+
+        <h2>🇮🇷 راهنمای فارسی</h2>
+
+        <h3>📌 معرفی</h3>
+
+        <p><strong>توجه مهم:</strong> هنگام وارد کردن رمز عبور نهایت دقت را داشته باشید. در صورت دو مرتبه ورود ناموفق، سیستم به‌طور خودکار آی‌پی دستگاه شما (رایانه یا تلفن‌همراهی که استفاده می‌کنید) را مسدود خواهد کرد.</p>
+
+        <p>این اسکریپت یک نصاب و راه‌انداز خودکار (All-in-One) برای ایجاد یک سرور مسیریابی امن و پرسرعت است. این ابزار به‌طور خودکار ابزارهای ضروری برای مسیریابی ترافیک، مدیریت DNS و کنترل دسترسی را نصب و پیکربندی می‌کند.</p>
+
+        <h3>🚀 ویژگی‌ها و عملکردهای اسکریپت</h3>
+
+        <p>هنگام اجرای این اسکریپت، وظایف زیر به‌طور خودکار انجام می‌شوند:</p>
+
+        <ol>
+            <li><strong>آپدیت سیستم و پیش‌نیازها:</strong> سیستم‌عامل را به‌روزرسانی کرده و پکیج‌های مورد نیاز (<code>curl</code>, <code>wget</code>, <code>iptables</code>, <code>vnstat</code>, <code>ipset</code>, <code>iftop</code>, <code>nethogs</code>, <code>jq</code> و غیره) را نصب می‌کند.</li>
+
+            <li><strong>بهینه‌سازی شبکه (BBR):</strong> الگوریتم TCP BBR و <code>fq_qdisc</code> را برای کنترل بهینه ترافیک شبکه و افزایش سرعت، فعال و پیکربندی می‌کند.</li>
+
+            <li><strong>نصب X-UI (ثنایی):</strong> در صورتی که پنل 3X-UI از قبل نصب نباشد، به‌طور خودکار آن را برای مدیریت پروکسی‌ها نصب می‌کند.</li>
+
+            <li><strong>پیکربندی AdGuard Home:</strong>
+                <ul>
+                    <li>نصب <strong>AdGuard Home</strong> با یک کانفیگ عمومی سفارشی‌سازی‌شده (Bind IP: <code>0.0.0.0</code>).</li>
+                    <li>بهینه‌سازی حجم کش، غیرفعال‌سازی لاگ‌های غیرضروری و ایمن‌سازی DNS در برابر سوءاستفاده‌های عمومی.</li>
+                </ul>
+            </li>
+
+            <li><strong>کنترل دسترسی پویا (IPSet و IPTables):</strong>
+                <ul>
+                    <li><strong>اسکریپت <code>restore_rules.sh</code>:</strong> بازسازی قوانین NAT و Mangle در زمان ریبوت سیستم تا ترافیک مجاز مستقیماً به پورت‌های X-UI محلی هدایت شود.</li>
+                    <li><strong>اسکریپت <code>adguard-monitor.sh</code>:</strong> اسکن لاگ‌های AdGuard Home برای یافتن آی‌پی کلاینت‌های جدید و افزودن پویای آن‌ها به IPSet با timeout ۱ ساعت.</li>
+                </ul>
+            </li>
+
+            <li><strong>آپدیت خودکار قوانین از گیت‌هاب:</strong>
+                <ul>
+                    <li>دریافت خودکار لیست دامنه‌های تمیز شما از گیت‌هاب، نادیده گرفتن کامنت‌های <code>#</code> و اضافه کردن <code>$dnsrewrite=[YOUR_SERVER_IP]</code> به آن‌ها.</li>
+                    <li>تنظیم یک کرون‌جاب (cronjob) برای به‌روزرسانی خودکار این لیست هر ۱۲ ساعت یک‌بار.</li>
+                </ul>
+            </li>
+
+            <li><strong>مدیریت حجم ترافیک و ابزارهای خط فرمان (CLI):</strong>
+                <ul>
+                    <li><strong>اسکریپت <code>traffic.sh</code> (دستور <code>hajm</code>):</strong> محاسبه دقیق مصرف پهنای باند، سهمیه باقی‌مانده و انجام ریست‌های ماهانه.</li>
+                    <li><strong>اسکریپت <code>display.sh</code>:</strong> نمایش یک بنر متنی (ASCII) زیبا از ترافیک باقی‌مانده به‌صورت خودکار هنگام ورود به SSH.</li>
+                    <li><strong>اسکریپت <code>panel.sh</code> (دستور <code>menu</code>):</strong> یک منوی تعاملی در خط فرمان برای مشاهده کاربران فعال، نظارت بر پهنای باند، مدیریت بلک‌لیست‌ها و ریستارت سرویس‌ها.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p><strong>توجه:</strong> پیش از اقدام به نصب، اطمینان حاصل کنید که پورت ۵۳ سرور توسط سرویس دیگری اشغال نشده باشد.</p>
+
+        <p>فایل تنظیمات مربوطه را باز کرده، عبارت <code>DNSStubListener=yes</code> را از حالت کامنت خارج کنید و آن را به مقدار <code>DNSStubListener=no</code> تغییر دهید:</p>
+
+        <pre><code class="language-bash">nano /etc/systemd/resolved.conf</code></pre>
+
+        <p>سپس <code>systemd-resolved.service</code> را ریستارت کنید و اقدام به نصب نمایید:</p>
+
+        <pre><code class="language-bash">systemctl restart systemd-resolved.service</code></pre>
+
+        <h3>🛠 آموزش نصب و استفاده</h3>
+
+        <p>می‌توانید اسکریپت نصب را با استفاده از <code>curl</code> اجرا کنید:</p>
+
+        <pre><code class="language-bash">bash &lt;(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/latest/download/install.sh)</code></pre>
+
+        <p>در طول فرآیند نصب، از شما خواسته می‌شود تا اطلاعات زیر را برای AdGuard Home وارد کنید:</p>
+
+        <p><strong>آدرس لینک (URL) (برای رول‌ها)</strong></p>
+
+        <pre><code>https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt</code></pre>
+
+        <p><strong>پورت (Port)</strong></p>
+
+        <p><strong>نام کاربری (Username) و رمز عبور (Password)</strong></p>
+
+        <p><strong>نکته:</strong> پیشنهاد می‌کنم برای رول‌ها از لینک اختصاصی من استفاده کنید. این یک لیست کامل برای دور زدن تحریم‌ها است که به‌طور مستمر به‌روزرسانی می‌شود.</p>
+
+        <p>پس از اتمام نصب، آدرس AdGuard شما به این شکل است:</p>
+
+        <pre><code>http://your-ip:port</code></pre>
+
+        <p><strong>نکته:</strong> از آنجایی که این یک کانفیگ شخصی‌سازی‌شده است، تغییرات و تنظیمات بیشتر را می‌توانید مستقیماً در فایل <code>/opt/AdGuardHome/AdGuardHome.yaml</code> انجام دهید.</p>
+
+    </div>
+</body>
+</html>
