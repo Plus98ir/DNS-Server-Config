@@ -1,23 +1,19 @@
-<div align="center">
-
 # 🌍 Personal DNS Server Setup & Routing Script
-<b>🇺🇸 English</b> |
-<a href="README-Fa.md"><b>🇮🇷 فارسی</b></a>
 
-</div>
+**🇺🇸 English** | [🇮🇷 فارسی](README-Fa.md)
 
 ---
 
-<a id="english"></a>
 ## 🇺🇸 English Documentation
 
 ### 📌 Overview
 
-* **Important Note: Please be very careful when entering your password. If you enter the incorrect password twice, the system will automatically block your device's IP (the computer or phone you are connecting from) — meaning it is not the server's IP. If this happens, you will need to change your local internet IP to reconnect.** *
-  
-This script is an **All-in-One Automated Setup** for creating a secure, high-performance routing server. It automatically installs and configures essential tools for traffic routing, DNS management, bandwidth monitoring, and user access control. It is designed to be public and deployable on any server.
+**Important Note:** Please be very careful when entering your password. If you enter the incorrect password twice, the system will automatically block your device's IP (the computer or phone you are using).
+
+This script is an **All-in-One Automated Setup** for creating a secure, high-performance routing server. It automatically installs and configures essential tools for traffic routing, DNS management, and access control.
 
 ### 🚀 Features & What It Does
+
 When you run this script, it automatically performs the following tasks:
 
 1. **System Update & Dependencies:** Updates the OS and installs required packages (`curl`, `wget`, `iptables`, `vnstat`, `ipset`, `iftop`, `nethogs`, `jq`, etc.).
@@ -36,176 +32,158 @@ When you run this script, it automatically performs the following tasks:
    * **`traffic.sh` (`hajm`)**: Calculates precise bandwidth usage, remaining quotas, and handles monthly resets.
    * **`display.sh`**: Shows a beautiful ASCII banner with remaining traffic automatically upon SSH login.
    * **`panel.sh` (`menu`)**: An interactive CLI menu to view active users, monitor bandwidth, manage blocklists, and restart services.
-  
-* **Note:**  Before proceeding with the installation, ensure that port 53 on the server is not occupied by another service.
-Open the relevant configuration file, uncomment the line DNSStubListener=yes, and change it to DNSStubListener=no.
 
-```txt
+**Note:** Before proceeding with the installation, ensure that port 53 on the server is not occupied by another service. Open the relevant configuration file, uncomment the line `DNSStubListener=yes`, and change it to `DNSStubListener=no`.
+
+```bash
 nano /etc/systemd/resolved.conf
 ```
+
 Then, restart systemd-resolved.service and proceed with the installation.
 
-```txt
+```bash
 systemctl restart systemd-resolved.service
 ```
 
 ### 🛠 Installation & Usage
+
 You can install and run the setup script using `curl`:
 
 ```bash
 bash <(curl -fsSL https://github.com/Plus98ir/DNS-Server-Config/releases/latest/download/install.sh)
 ```
-"During installation, you will be asked to provide the following details for AdGuard Home:
 
-URL (for the rules)
+During installation, you will be asked to provide the following details for AdGuard Home:
 
-```txt
-https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
+**URL (for the rules)**
 
 ```
-Port
+https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
+```
 
-Username and Password
+**Port**
 
-Note: I recommend using my link for the rules. It is a complete anti-sanction list that is constantly updated.
+**Username and Password**
 
-
-<img width="960" height="161" alt="image" src="https://github.com/user-attachments/assets/de6a8be4-1acb-446e-a9fa-7e722a9415e2" />
+**Note:** I recommend using my link for the rules. It is a complete anti-sanction list that is constantly updated.
 
 After the installation is complete, your AdGuard address is:
+```
 http://your-ip:port
+```
 
-**Note:** Since this is a custom configuration
-further changes and configurations can be done directly in the /opt/AdGuardHome/AdGuardHome.yaml file
+**Note:** Since this is a custom configuration, further changes and configurations can be done directly in the `/opt/AdGuardHome/AdGuardHome.yaml` file
 
 ---
 
-📜 Default Routing Rules
-During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use my default optimized list by pasting this link when prompted:
+### 📜 Default Routing Rules
 
-If you are using custom routing rules, you must execute the following command in your terminal after providing the rules URL
+During installation, the script will ask for a GitHub URL. If you don't have your own rules yet, you can use my default optimized list by pasting the link when prompted.
 
-```txt
+If you are using custom routing rules, you must execute the following command in your terminal after providing the rules URL:
+
+```bash
 /root/update-adguard.sh
 ```
 
-Navigate to Filters > DNS blocklists, and click the blue Check for updates button
-
-<img width="1363" height="799" alt="image" src="https://github.com/user-attachments/assets/d18b0f53-2f42-4494-af68-3f94069dd718" />
+Navigate to **Filters > DNS blocklists**, and click the blue **Check for updates** button.
 
 ---
 
-* **Available Commands After Install** (Aliases):
-  
-Type * **menu** * anywhere in the terminal to open the interactive management panel.
+### Available Commands After Install (Aliases)
 
-<img width="379" height="255" alt="image" src="https://github.com/user-attachments/assets/65b35cf0-c95e-4f04-a5cb-d20e0ae752bf" />
-
-**Here you can choose what you want to do.**
+Type **`menu`** anywhere in the terminal to open the interactive management panel. Here you can choose what you want to do.
 
 ---
-Type * **hajm** * to view detailed bandwidth usage and manage traffic quotas.
 
-<img width="412" height="272" alt="image" src="https://github.com/user-attachments/assets/fa59b82b-9789-4f11-ae99-4ebec481be3c" />
- 
- **You can adjust and set it by your server's default time and GB.**
- 
+Type **`hajm`** to view detailed bandwidth usage and manage traffic quotas. You can adjust and set it by your server's default time and GB.
+
 ---
 
-⚙️ **Important Post-Installation Steps** (X-UI Configuration)
+### ⚙️ Important Post-Installation Steps (X-UI Configuration)
+
 The only thing you need to do after the installation is to configure the X-UI Sanaei panel as follows:
 
-Create two new Inbounds of type **Tunnel**.
+1. Create two new Inbounds of type **Tunnel**.
+2. Set the listening address (Listen IP) for both to `127.0.0.1`. Configure the first one on port 443 and the second one on port 80.
+3. For both Inbounds, ensure that Sniffing is enabled, and explicitly check the quic, http, and tls options.
+4. Finally, go to the Routing Rules section in the Sanaei panel. Route these two inbounds to an Outbound (preferably, a REALITY config connected to your foreign server under current network conditions).
 
-Set the listening address (Listen IP) for both to 127.0.0.1. Configure the first one on port 443 and the second one on port 80.
+### 🔒 How to Authorize Users (Wildcard Setup & Clients)
 
-For both Inbounds, ensure that Sniffing is enabled, and explicitly check the quic, http, and tls options.
+To prevent your server from being used as an Open Resolver and to give each user private access, you must configure Client IDs using a Wildcard domain.
 
-Finally, go to the Routing Rules section in the Sanaei panel. Route these two inbounds to an Outbound (preferably, under current network conditions, a REALITY config connected to your foreign server, or any other outbound that bypasses sanctions).
+#### Get a Wildcard Domain
 
-🔒 **How to Authorize Users** (Wildcard Setup & Clients)
-To prevent your server from being used as an Open Resolver and to give each user private access, you must configure Client IDs using a Wildcard domain:
+In your domain's DNS manager (e.g., Cloudflare), create an A record with the name `*` (Wildcard) pointing to your Server IP. Ensure you have a Wildcard SSL certificate (e.g., `*.yourdomain.com`).
 
-Get a Wildcard Domain:
-In your domain's DNS manager (e.g., Cloudflare), create an A record with the name * (Wildcard) pointing to your Server IP. Ensure you have a Wildcard SSL certificate (e.g., *.yourdomain.com).
 You can use Certbot. First, you need to install **certbot**:
-```txt
+
+```bash
 apt install certbot
 ```
+
 Then run the command to get the certificate:
 
-```txt
+```bash
 certbot certonly \
 --manual \
 --preferred-challenges dns \
 -d "*.yourdomain.com" \
 -d "yourdomain.com"
 ```
-You need to add 2 records as text in your Cloudflare; step-by-step, follow Certbot.
+
+You need to add 2 records as text in your Cloudflare; follow the steps provided by Certbot.
+
 Then you will get your certificate paths like this:
 
-```txt
+```
 /etc/letsencrypt/live/yourdomain.com/fullchain.pem
 ```
-```txt
+
+```
 /etc/letsencrypt/live/yourdomain.com/privkey.pem
 ```
-Then go to Settings > Encryption like the picture:
 
-(Except the red line on this picture is an example for you; if you provide a valid address, you will see a green line.)
+Then go to **Settings > Encryption** like the picture.
 
-**(If you have another service on port 443, be careful and don't use port 443 for DoH.
-Use another port. 443 is safe, but if you use a different port, your DoH address will look like this: 
-https://yourdomain.com:8443/dns-query/yourclientname)**
-
----
-
-<img width="625" height="856" alt="image" src="https://github.com/user-attachments/assets/a826e104-25a9-47b0-a31e-bd9dc8941ea2" />
+**Note:** If you have another service on port 443, be careful and don't use port 443 for DoH. Use another port. If you use a different port, your DoH address will look like this:
+```
+https://yourdomain.com:8443/dns-query/yourclientname
+```
 
 ---
 
-So now you can go to the setup guide and you will see your DoH, DoT, and QUIC, as well as your IP address. But in this tutorial, the IP will not work because it's in private mode.
+#### Add Clients in AdGuard Home
 
----
+1. Go to the AdGuard Home Web Panel.
+2. Navigate to **Settings > Client Settings** and click **Add Client**.
+3. Enter a Name for the user (e.g., Sadeq-Pc).
+4. In the Identifiers field, type a unique Client ID (e.g., sadeqpc1).
+5. Save the client.
 
-<img width="819" height="787" alt="image" src="https://github.com/user-attachments/assets/5057a5a0-2bdb-48f0-b627-546a2323adb5" />
+#### Connecting the User
 
----
-
-Add Clients in AdGuard Home:
-
-Go to the AdGuard Home Web Panel.
-
-Navigate to Settings > Client Settings and click Add Client.
-
-Enter a Name for the user (e.g., Sadeq-Pc).
-
-In the Identifiers field, type a unique Client ID (e.g., sadeqpc1).
-
-Save the client.
-
----
-
-Connecting the User:
 The user can now connect securely using DoT or DoH. AdGuard will recognize them via the identifier:
 
-**DoT**: (tls://yourclientname.yourdomain.com)
+**DoT:** `tls://yourclientname.yourdomain.com`
 
-**DoH**: (https://yourdomain.com/dns-query/yourclientname)
+**DoH:** `https://yourdomain.com/dns-query/yourclientname`
 
-**Recomend use spacial id like 67ca2c09 for any client**
-now your client shoud use like this
+**Recommend using a special id like `67ca2c09` for any client**
 
-**DoT**: (tls://67ca2c09.yourdomain.com)
+Now your client should use it like this:
 
-**DoH**: (https://yourdomain.com/dns-query/yourclientname)
+**DoT:** `tls://67ca2c09.yourdomain.com`
+
+**DoH:** `https://yourdomain.com/dns-query/yourclientname`
 
 The User ID is important, but by name, you can recognize who connected to your server in the AdGuard Home log manager.
 
 ---
+
 If you run into any issues, feel free to contact me on Telegram. I will get back to you as soon as possible.
 
-```txt
+```
 @PlusNE
 ```
-
