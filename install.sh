@@ -27,12 +27,15 @@ echo -e "\e[1;36m[1/8] Updating system and installing dependencies...\e[0m"
 apt-get update -y
 apt-get install -y curl wget nano iptables vnstat ipset bc nethogs iftop jq figlet apache2-utils
 
-# استخراج خودکار آی‌پی سرور
-SERVER_IP=$(curl -s4 api.ipify.org || curl -s4 icanhazip.com || curl -s4 ifconfig.me)
-
-# اگر آی‌پی پیدا نشد، از کاربر بپرسد
+# پیدا کردن دومین آی‌پی سرور (اگر نبود، استفاده از آی‌پی اول)
+SERVER_IP=$(ip -4 addr show scope global | awk '$1 == "inet" {print $2}' | cut -d/ -f1 | sed -n '2p')
 if [[ ! "$SERVER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    SERVER_IP=$(hostname -I | awk '{print $1}')
+    SERVER_IP=$(ip -4 addr show scope global | awk '$1 == "inet" {print $2}' | cut -d/ -f1 | sed -n '1p')
+fi
+
+# اگر باز هم پیدا نشد، از سرویس‌های آنلاین یا پرسش از کاربر استفاده کند
+if [[ ! "$SERVER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    SERVER_IP=$(curl -s4 api.ipify.org || curl -s4 icanhazip.com || curl -s4 ifconfig.me)
 fi
 
 if [[ ! "$SERVER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
