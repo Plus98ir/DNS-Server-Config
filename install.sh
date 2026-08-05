@@ -942,9 +942,6 @@ chmod +x /root/update-adguard.sh
 # تنظیم کرون‌جاب آپدیت رول‌های ادگارد
 (crontab -l 2>/dev/null | grep -v "/root/update-adguard.sh" || true; echo "0 */12 * * * /root/update-adguard.sh") | crontab -
 
-# تنظیم کرون‌جاب اجرای مجدد رول‌های فایروال در بازه‌های ۱۲ ساعته
-(crontab -l 2>/dev/null | grep -v "0 \*/12 \* \* \* /root/restore_rules.sh" || true; echo "0 */12 * * * /root/restore_rules.sh") | crontab -
-
 echo -e "\e[1;36m[7/8] Finalizing Setup...\e[0m"
 
 systemctl daemon-reload
