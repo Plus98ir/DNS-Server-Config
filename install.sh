@@ -917,7 +917,7 @@ echo -e "\e[1;36m[6/8] Creating AdGuard Updater Script...\e[0m"
 cat << EOF > /root/update-adguard.sh
 #!/bin/bash
 
-# پیدا کردن هوشمند آی‌پی سرور در زمان اجرای آپدیت
+# ۱. استخراج هوشمند آی‌پی سرور در زمان اجرای آپدیت
 SERVER_IP=\$(ip -4 addr show scope global | awk '\$1 == "inet" {print \$2}' | cut -d/ -f1 | sed -n '2p')
 if [[ ! "\$SERVER_IP" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
     SERVER_IP=\$(ip -4 addr show scope global | awk '\$1 == "inet" {print \$2}' | cut -d/ -f1 | sed -n '1p')
@@ -929,10 +929,13 @@ if [[ ! "\$SERVER_IP" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
     exit 1
 fi
 
+# ۲. استفاده از لینک متغیر یا لینک مستقیم raw گیت‌هاب (جلوگیری از خطای تگ‌های HTML)
 URL="$GITHUB_URL"
 [ -z "\$URL" ] && URL="https://ghproxy.net/https://raw.githubusercontent.com/Plus98ir/AdGuard_Rules/main/unsanction-rules.txt"
+
 TEMP_FILE="/tmp/unsanction-rules.txt"
 
+# ۳. دانلود ایمن فایل و چک کردن وضعیت HTTP
 HTTP_STATUS=\$(curl -s -w "%{http_code}" -o "\$TEMP_FILE" "\$URL")
 
 if [ "\$HTTP_STATUS" -ne 200 ] || [ ! -s "\$TEMP_FILE" ]; then
@@ -940,11 +943,13 @@ if [ "\$HTTP_STATUS" -ne 200 ] || [ ! -s "\$TEMP_FILE" ]; then
     exit 1
 fi
 
+# ۴. پردازش دقیق و فیلتر کردن کامنت‌ها و تگ‌های اضافی با awk
 awk -v ip="\$SERVER_IP" '
 {
     sub(/\\r/,"");
-    if (length(\$1) > 0 && \$1 !~ /^#/) {
-        print "||"\$1"^\\\$dnsrewrite="ip
+    gsub(/^[[:space:]]+|[[:space:]]+$/, "");
+    if (length(\$0) > 0 && \$0 !~ /^#/ && \$0 !~ /^</) {
+        print "||" \$0 "^\\\$dnsrewrite=" ip
     }
 }' "\$TEMP_FILE" > /opt/AdGuardHome/data/adguard-rewrite.txt
 
