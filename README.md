@@ -84,8 +84,8 @@ During installation, you will be asked to provide the following details for AdGu
 
 **URL (for the rules)**
 
-```
-https://github.com/Plus98ir/AdGuard_Rules/blob/main/unsanction-rules.txt
+```txt
+https://raw.githubusercontent.com/Plus98ir/AdGuard_Rules/refs/heads/main/unsanction-rules.txt
 ```
 
 **Port**
