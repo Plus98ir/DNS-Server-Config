@@ -375,65 +375,20 @@ chmod +x /usr/local/bin/adguard-monitor.sh
 # ---------------------------------------------------------
 cat << 'EOF' > /root/traffic.sh
 #!/bin/bash
-# --- فایل تنظیمات ---
-SETTINGS_FILE="$HOME/.traffic_settings"
-EXTRA_FILE="$HOME/.extra_traffic"
-# --- تنظیمات پایه ---
-BASE_LIMIT=100   # سقف پایه به GB
-EXPIRY_DATE="2026-07-10"
 
-# بارگذاری تنظیمات
-if [ -f "$SETTINGS_FILE" ]; then
-    source "$SETTINGS_FILE"
-else
-    EXTRA_GB=0
-    OFFSET=0
-fi
-if [ -f "$EXTRA_FILE" ]; then
-    EXTRA=$(cat "$EXTRA_FILE")
-else
-    EXTRA=0
-fi
+# --- بارگذاری تنظیمات ---
+[ -f "$HOME/.traffic_settings" ] && source "$HOME/.traffic_settings"
 
+# --- مقادیر پیش‌فرض (اگر در فایل تنظیمات نبود) ---
+BASE_LIMIT=${BASE_LIMIT:-100}
 EXTRA_GB=${EXTRA_GB:-0}
 OFFSET=${OFFSET:-0}
-BASE_LIMIT=${BASE_LIMIT:-200}
-EXTRA=${EXTRA:-0}
+INCLUDE_UPLOAD=${INCLUDE_UPLOAD:-"no"}
+# اگر تاریخی ست نشده بود، می‌تونی مقدار پیش‌فرض رو خالی بذاری یا همون تاریخ خودت رو نگه داری
+EXPIRY_DATE=${EXPIRY_DATE:-""} 
 
-# محاسبه سقف نهایی
-TOTAL_LIMIT=$(echo "scale=2; $BASE_LIMIT + $EXTRA_GB + $OFFSET" | bc)
-
-# --- تابع ذخیره تنظیمات ---
-save_settings() {
-    echo "EXTRA_GB=$EXTRA_GB" > "$SETTINGS_FILE"
-    echo "EXPIRY_DATE=\"$EXPIRY_DATE\"" >> "$SETTINGS_FILE"
-    echo "OFFSET=$OFFSET" >> "$SETTINGS_FILE"
-}
-
-# --- بخش ریست ---
-TODAY_TS=$(date +%s -d "$(date +%Y-%m-%d)")
-EXPIRY_TS=$(date +%s -d "$EXPIRY_DATE")
-
-# اگر امروز برابر یا بعد از تاریخ انقضا باشد، دیتابیس ریست می‌شود
-if [ "$TODAY_TS" -ge "$EXPIRY_TS" ]; then
-    vnstat --create -i eth0 --force > /dev/null 2>&1
-    rm -f "$EXTRA_FILE"
-    
-    # آپدیت کردن تاریخ انقضا به یک ماه آینده به صورت خودکار
-    EXPIRY_DATE=$(date +%Y-%m-%d -d "$EXPIRY_DATE + 1 month")
-    save_settings
-fi
-
-# --- نمایش جدول مصرف روزانه ---
-echo -e "\e[1;36m====================================================\e[0m"
-echo -e "\e[1;33m    DATE         DOWNLOAD    UPLOAD      TOTAL\e[0m"
-echo -e "\e[1;36m----------------------------------------------------\e[0m"
-vnstat -d --short | grep -v "estimated" | grep -A 5 "day" | tail -n 5 | \
-awk '{printf " %-12s %-12s %-12s %-12s\n", $1, $2$3, $5$6, $8$9}'
-echo -e "\e[1;36m----------------------------------------------------\e[0m"
-
-# --- استخراج کل مصرف دانلود (RX) چرخه فعلی ---
-USED_GB=$(vnstat -m | awk '
+# --- استخراج مصرف دانلود (RX) ---
+RX_GB=$(vnstat -m | awk '
     /^[[:space:]]*[0-9]{4}-[0-9]{2}/ || /^[[:space:]]*[A-Za-z]{3} \x27[0-9]{2}/ {
         val=$2; unit=$3
         if(unit == "MiB") val = val / 1024
@@ -446,56 +401,66 @@ USED_GB=$(vnstat -m | awk '
         printf "%.2f\n", total
     }
 ')
-USED_GB=${USED_GB:-0}
+RX_GB=${RX_GB:-0}
 
-# محاسبه باقی‌مانده (فقط بر اساس دانلود)
-REMAINING_GB=$(echo "scale=2; $TOTAL_LIMIT - $USED_GB" | bc)
+# --- استخراج مصرف آپلود (TX) ---
+TX_GB=$(vnstat -m | awk '
+    /^[[:space:]]*[0-9]{4}-[0-9]{2}/ || /^[[:space:]]*[A-Za-z]{3} \x27[0-9]{2}/ {
+        val=$5; unit=$6
+        if(unit == "MiB") val = val / 1024
+        else if(unit == "KiB") val = val / (1024 * 1024)
+        else if(unit == "TiB") val = val * 1024
+        total += val
+    }
+    END {
+        if(total == "") total = 0
+        printf "%.2f\n", total
+    }
+')
+TX_GB=${TX_GB:-0}
 
-# --- محاسبه روزهای باقی‌مانده ---
-DAYS_LEFT=$(( ($(date -d "$EXPIRY_DATE" +%s) - $(date +%s)) / 86400 ))
-
-# --- نمایش اطلاعات ---
-echo -e "\e[1;32m Monthly Download: $USED_GB GB\e[0m"
-echo -e "\e[1;31m Traffic Left:     $REMAINING_GB GB of $TOTAL_LIMIT GB\e[0m"
-
-if (( $(echo "$EXTRA_GB != 0" | bc -l) )); then
-    echo -e "\e[1;33m (Included $EXTRA_GB GB extra package)\e[0m"
-fi
-if [ $DAYS_LEFT -gt 0 ]; then
-    echo -e "\e[1;35m Days Remaining:   $DAYS_LEFT Days\e[0m"
+# --- محاسبه بر اساس تنظیمات آپلود/دانلود ---
+if [ "$INCLUDE_UPLOAD" == "yes" ]; then
+    USED_GB=$(echo "scale=2; $RX_GB + $TX_GB" | bc)
 else
-    echo -e "\e[1;31m Status:           RESETTING FOR NEW MONTH...\e[0m"
-fi
-echo -e "\e[1;36m====================================================\e[0m"
-
-# --- بررسی حالت خودکار (برای جلوگیری از گیر کردن در ربات) ---
-if [ "$1" == "auto" ]; then
-    exit 0
+    USED_GB=$RX_GB
 fi
 
-# --- منوی تعاملی (فقط وقتی دستی اجرا شود فعال است) ---
-echo -e "\e[1;33m[1] Add/Reduce GB  [2] Set Expiry Date  [3] Reset Extra
-[4] Sync Offset  [Enter] Exit\e[0m"
-read -p "Select option: " opt
+# --- محاسبات نهایی هماهنگ با اسکریپت اصلی ---
+ACTUAL_USED=$(echo "scale=2; $USED_GB + $OFFSET" | bc)
+TOTAL_LIMIT=$(echo "scale=2; $BASE_LIMIT + $EXTRA_GB" | bc)
+REMAINING_GB=$(echo "scale=2; $TOTAL_LIMIT - $ACTUAL_USED" | bc)
 
-case "$opt" in
-    1) read -p "Enter GB to add/reduce: " new_gb
-       EXTRA_GB=$new_gb
-       save_settings
-       exec bash "$0" ;;
-    2) read -p "New Expiry Date (YYYY-MM-DD): " new_date
-       EXPIRY_DATE="$new_date"
-       save_settings
-       exec bash "$0" ;;
-    3) EXTRA_GB=0
-       OFFSET=0
-       save_settings
-       exec bash "$0" ;;
-    4) read -p "Current Offset is $OFFSET. Enter adjustment: " adjust
-       OFFSET=$(echo "scale=2; $OFFSET + $adjust" | bc)
-       save_settings
-       exec bash "$0" ;;
-esac
+# ---------------------------------------------------------
+# --- بخش جدید: محاسبه روزهای باقیمانده (ضد کرش) ---
+# ---------------------------------------------------------
+if [ -z "$EXPIRY_DATE" ]; then
+    DAYS_LEFT="-"
+else
+    CURRENT_TIME=$(date +%s)
+    TARGET_TIME=$(date -d "$EXPIRY_DATE" +%s)
+    
+    SECONDS_LEFT=$(( TARGET_TIME - CURRENT_TIME ))
+    DAYS_LEFT=$(( SECONDS_LEFT / 86400 ))
+
+    if [ "$DAYS_LEFT" -le 0 ]; then
+        DAYS_LEFT=0
+    fi
+fi
+# ---------------------------------------------------------
+
+# --- نمایش در ترمینال ---
+clear
+echo -e "\e[1;36m"
+figlet -f slant "TRAFFIC"
+echo -e "\e[0m"
+
+echo -e "\e[1;37m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+echo -e "\e[1;32m  TOTAL TRAFFIC:  \e[1;37m$TOTAL_LIMIT GB\e[0m"
+echo -e "\e[1;32m  TRAFFIC LEFT:   \e[1;33m$REMAINING_GB GB\e[0m"
+echo -e "\e[1;37m----------------------------------------------------\e[0m"
+echo -e "\e[1;32m  REMAINING DAYS: \e[1;36m$DAYS_LEFT Days\e[0m"
+echo -e "\e[1;37m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
 EOF
 chmod +x /root/traffic.sh
 
