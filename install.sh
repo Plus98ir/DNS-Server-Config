@@ -916,26 +916,40 @@ chmod +x /root/panel.sh
 echo -e "\e[1;36m[6/8] Creating AdGuard Updater Script...\e[0m"
 cat << EOF > /root/update-adguard.sh
 #!/bin/bash
-URL="$GITHUB_URL"
-IP="$SERVER_IP"
-OUT="/opt/AdGuardHome/data/adguard-rewrite.txt"
 
-mkdir -p /opt/AdGuardHome/data/
-
-if [ -z "\$URL" ]; then
-    echo "" > "\$OUT"
-    echo "GitHub URL was skipped. Created an empty rules file."
-else
-    curl -s "\$URL" | awk -v ip="\$IP" '
-        !/^[[:space:]]*#/ {
-            sub(/\r/,"");
-            if (length(\$1) > 0) {
-                print "||" \$1 "^\$dnsrewrite=" ip
-            }
-        }
-    ' > "\$OUT"
-    echo "AdGuard Rules successfully updated at \$(date)"
+# پیدا کردن هوشمند آی‌پی سرور در زمان اجرای آپدیت
+SERVER_IP=\$(ip -4 addr show scope global | awk '\$1 == "inet" {print \$2}' | cut -d/ -f1 | sed -n '2p')
+if [[ ! "\$SERVER_IP" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
+    SERVER_IP=\$(ip -4 addr show scope global | awk '\$1 == "inet" {print \$2}' | cut -d/ -f1 | sed -n '1p')
 fi
+if [[ ! "\$SERVER_IP" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
+    SERVER_IP=\$(curl -s4 api.ipify.org || curl -s4 icanhazip.com || curl -s4 ifconfig.me)
+fi
+if [[ ! "\$SERVER_IP" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
+    exit 1
+fi
+
+URL="$GITHUB_URL"
+[ -z "\$URL" ] && URL="https://ghproxy.net/https://raw.githubusercontent.com/Plus98ir/AdGuard_Rules/main/unsanction-rules.txt"
+TEMP_FILE="/tmp/unsanction-rules.txt"
+
+HTTP_STATUS=\$(curl -s -w "%{http_code}" -o "\$TEMP_FILE" "\$URL")
+
+if [ "\$HTTP_STATUS" -ne 200 ] || [ ! -s "\$TEMP_FILE" ]; then
+    rm -f "\$TEMP_FILE"
+    exit 1
+fi
+
+awk -v ip="\$SERVER_IP" '
+{
+    sub(/\\r/,"");
+    if (length(\$1) > 0 && \$1 !~ /^#/) {
+        print "||"\$1"^\\\$dnsrewrite="ip
+    }
+}' "\$TEMP_FILE" > /opt/AdGuardHome/data/adguard-rewrite.txt
+
+rm -f "\$TEMP_FILE"
+echo "AdGuard Rules successfully updated at \$(date)"
 EOF
 chmod +x /root/update-adguard.sh
 
