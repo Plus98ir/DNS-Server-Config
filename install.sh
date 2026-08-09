@@ -301,32 +301,31 @@ echo -e "\e[1;36m[5/8] Injecting Custom Scripts (Updating existing ones)...\e[0m
 cat << EOF > /root/restore_rules.sh
 #!/bin/bash
 
-# ۱. ساخت لیست‌ها (اگر وجود نداشته باشند ساخته می‌شوند و دیتای فعلی پاک نمی‌شود)
-ipset -! create allowed_users hash:ip timeout 3600 counters
-ipset -! create blacklist hash:ip hashsize 4096 maxelem 65536 counters
+# ۱. ساخت IPSetها به صورت هوشمند 
+# (استفاده از exist- باعث میشه اگر لیست وجود داشت، آی‌پی‌ها و تایمرهاش پاک نشن)
+ipset create allowed_users hash:ip timeout 3600 counters -exist
+ipset create blacklist hash:ip hashsize 4096 maxelem 65536 counters -exist
 
-# ۲. مسدودسازی لیست سیاه در فایروال بومی (رول جدید)
+# ۲. اعمال قانون بلک‌لیست (مسدود کردن مستقیم در ورودی)
 iptables -C INPUT -m set --match-set blacklist src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set blacklist src -j DROP
 
-# ۳. ساخت Chain اختصاصی (اگر نباشد ساخته می‌شود)
+# ۳. ایجاد Chain بدون خطا
 iptables -t nat -N ts-postrouting 2>/dev/null
 
-# ۴. رول‌های NAT (اصلاح‌ شده و هوشمند)
-iptables -t nat -C PREROUTING -d 109.70.76.136 -j RETURN 2>/dev/null || iptables -t nat -I PREROUTING 1 -d 109.70.76.136 -j RETURN
+# ۴. اعمال رول‌های DNAT به 127.0.0.1 دقیقاً طبق کد اصلی خودت
+# (ترافیک اینجا بررسی و به لوکال هاست فوروارد میشه)
+iptables -t nat -C PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443 2>/dev/null || iptables -t nat -A PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
 
-iptables -t nat -C PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j ACCEPT 2>/dev/null || iptables -t nat -A PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j ACCEPT
+iptables -t nat -C PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:80 2>/dev/null || iptables -t nat -A PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:80
 
-iptables -t nat -C PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j ACCEPT 2>/dev/null || iptables -t nat -A PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j ACCEPT
+iptables -t nat -C PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443 2>/dev/null || iptables -t nat -A PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
 
-iptables -t nat -C PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j ACCEPT 2>/dev/null || iptables -t nat -A PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j ACCEPT
+# ۵. رول RETURN 
+# (این رول رو بدون -I 1 در اینجا اضافه می‌کنیم که بعد از DNAT اجرا بشه و ترافیک رو خفه نکنه)
+iptables -t nat -C PREROUTING -d 109.70.76.135 -j RETURN 2>/dev/null || iptables -t nat -A PREROUTING -d 109.70.76.135 -j RETURN
 
+# ۶. مسیریابی خروجی
 iptables -t nat -C POSTROUTING -j ts-postrouting 2>/dev/null || iptables -t nat -A POSTROUTING -j ts-postrouting
-
-# ۵. رول‌های Mangle (هوشمند)
-iptables -t mangle -C PREROUTING -p udp --dport 443 2>/dev/null || iptables -t mangle -A PREROUTING -p udp --dport 443
-iptables -t mangle -C PREROUTING -p tcp --dport 443 2>/dev/null || iptables -t mangle -A PREROUTING -p tcp --dport 443
-iptables -t mangle -C PREROUTING -p tcp --dport 80 2>/dev/null || iptables -t mangle -A PREROUTING -p tcp --dport 80
-iptables -t mangle -C PREROUTING -m set --match-set allowed_users src 2>/dev/null || iptables -t mangle -A PREROUTING -m set --match-set allowed_users src
 EOF
 chmod +x /root/restore_rules.sh
 
