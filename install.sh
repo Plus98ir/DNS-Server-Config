@@ -301,28 +301,34 @@ echo -e "\e[1;36m[5/8] Injecting Custom Scripts (Updating existing ones)...\e[0m
 cat << EOF > /root/restore_rules.sh
 #!/bin/bash
 
-# ۱. ساخت IPSetها به صورت هوشمند 
-# (استفاده از exist- باعث میشه اگر لیست وجود داشت، آی‌پی‌ها و تایمرهاش پاک نشن)
+# ۱. ساخت IPSetها (مطمئن شوید لیست قبلی را دستی پاک کرده‌اید تا با counters ساخته شود)
 ipset create allowed_users hash:ip timeout 3600 counters -exist
 ipset create blacklist hash:ip hashsize 4096 maxelem 65536 counters -exist
 
-# ۲. اعمال قانون بلک‌لیست (مسدود کردن مستقیم در ورودی)
+# ۲. اعمال قانون بلک‌لیست
 iptables -C INPUT -m set --match-set blacklist src -j DROP 2>/dev/null || iptables -I INPUT -m set --match-set blacklist src -j DROP
+
+# --- بخش حیاتی برای شمارش دقیق حجم کل ترافیک کاربران ---
+iptables -t mangle -C PREROUTING -m set --match-set allowed_users src -j ACCEPT 2>/dev/null || iptables -t mangle -I PREROUTING -m set --match-set allowed_users src -j ACCEPT
+iptables -t mangle -C POSTROUTING -m set --match-set allowed_users dst -j ACCEPT 2>/dev/null || iptables -t mangle -I POSTROUTING -m set --match-set allowed_users dst -j ACCEPT
+# -------------------------------------------------------
+
+# --- بخش شمارنده‌های ترافیک گلوبال (پورت ۸۰ و ۴۴۳) ---
+iptables -t mangle -C PREROUTING -p tcp --dport 80 2>/dev/null || iptables -t mangle -I PREROUTING -p tcp --dport 80
+iptables -t mangle -C PREROUTING -p tcp --dport 443 2>/dev/null || iptables -t mangle -I PREROUTING -p tcp --dport 443
+iptables -t mangle -C PREROUTING -p udp --dport 443 2>/dev/null || iptables -t mangle -I PREROUTING -p udp --dport 443
+# -------------------------------------------------------
 
 # ۳. ایجاد Chain بدون خطا
 iptables -t nat -N ts-postrouting 2>/dev/null
 
-# ۴. اعمال رول‌های DNAT به 127.0.0.1 دقیقاً طبق کد اصلی خودت
-# (ترافیک اینجا بررسی و به لوکال هاست فوروارد میشه)
-iptables -t nat -C PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443 2>/dev/null || iptables -t nat -A PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
+# ۴. اعمال رول‌های DNAT به پورت‌های داخلی
+iptables -t nat -C PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443 2>/dev/null || iptables -t nat -I PREROUTING -p tcp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
+iptables -t nat -C PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:80 2>/dev/null || iptables -t nat -I PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:80
+iptables -t nat -C PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443 2>/dev/null || iptables -t nat -I PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
 
-iptables -t nat -C PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:80 2>/dev/null || iptables -t nat -A PREROUTING -p tcp --dport 80 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:80
-
-iptables -t nat -C PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443 2>/dev/null || iptables -t nat -A PREROUTING -p udp --dport 443 -m set --match-set allowed_users src -j DNAT --to-destination 127.0.0.1:443
-
-# ۵. رول RETURN 
-# (این رول رو بدون -I 1 در اینجا اضافه می‌کنیم که بعد از DNAT اجرا بشه و ترافیک رو خفه نکنه)
-iptables -t nat -C PREROUTING -d 109.70.76.135 -j RETURN 2>/dev/null || iptables -t nat -A PREROUTING -d 109.70.76.135 -j RETURN
+# ۵. رول RETURN
+iptables -t nat -C PREROUTING -d $SERVER_IP -j RETURN 2>/dev/null || iptables -t nat -A PREROUTING -d $SERVER_IP -j RETURN
 
 # ۶. مسیریابی خروجی
 iptables -t nat -C POSTROUTING -j ts-postrouting 2>/dev/null || iptables -t nat -A POSTROUTING -j ts-postrouting
@@ -387,7 +393,6 @@ cat << 'EOF' > /root/traffic.sh
 SETTINGS_FILE="$HOME/.traffic_settings"
 EXTRA_FILE="$HOME/.extra_traffic"
 
-# بارگذاری تنظیمات
 if [ -f "$SETTINGS_FILE" ]; then
     source "$SETTINGS_FILE"
 fi
@@ -400,7 +405,7 @@ fi
 
 # --- مقادیر پیش‌فرض ---
 BASE_LIMIT=${BASE_LIMIT:-100}
-EXPIRY_DATE=${EXPIRY_DATE:-""}
+EXPIRY_DATE=${EXPIRY_DATE:-"2026-07-10"}
 EXTRA_GB=${EXTRA_GB:-0}
 OFFSET=${OFFSET:-0}
 CARRY_OVER=${CARRY_OVER:-"yes"}
@@ -419,9 +424,9 @@ save_settings() {
     echo "LANGUAGE=\"$LANGUAGE\"" >> "$SETTINGS_FILE"
 }
 
-# --- بخش ترجمه (چندزبانه) ---
+# --- بخش ترجمه ---
 if [ "$LANGUAGE" == "fa" ]; then
-    L_TBL_HDR="    تاریخ        دانلود        آپلود          مجموع"
+    L_TBL_HDR="    تاریخ        دانلود        آپلود         مجموع"
     L_RX="دانلود (RX):            "
     L_TX="آپلود (TX):             "
     L_OFFSET="ترافیک از دست رفته (Offset):"
@@ -446,7 +451,7 @@ if [ "$LANGUAGE" == "fa" ]; then
     L_PR_EXT="حجم مورد نظر برای افزودن/کسر را وارد کنید: "
     L_PR_BAS="حجم پایه جدید را وارد کنید (فعلی $BASE_LIMIT گیگ): "
     L_PR_EXP="تاریخ انقضای جدید را وارد کنید (سال-ماه-روز): "
-    L_PR_OFF="آفست فعلی $OFFSET گیگابایت است. حجم دانلود از دست رفته را برای افزودن وارد کنید: "
+    L_PR_OFF="حجم آفست را برای اصلاح مصرف وارد کنید: "
     L_MSG_RES="مصرف ماهانه با موفقیت صفر شد!"
 else
     L_TBL_HDR="    DATE         DOWNLOAD    UPLOAD      TOTAL"
@@ -474,11 +479,11 @@ else
     L_PR_EXT="Enter GB to add/reduce extra: "
     L_PR_BAS="Enter new Base Monthly GB (current is $BASE_LIMIT): "
     L_PR_EXP="New Expiry Date (YYYY-MM-DD): "
-    L_PR_OFF="Current lost traffic offset is $OFFSET GB. Enter new offset to ADD to usage: "
+    L_PR_OFF="Enter volume to add/reduce to offset: "
     L_MSG_RES="Monthly usage reset successfully!"
 fi
 
-# --- استخراج مصرف دانلود و آپلود ---
+# --- استخراج مصرف ---
 RX_GB=$(vnstat -m | awk '
     /^[[:space:]]*[0-9]{4}-[0-9]{2}/ || /^[[:space:]]*[A-Za-z]{3} \x27[0-9]{2}/ {
         val=$2; unit=$3
@@ -510,42 +515,45 @@ TX_GB=$(vnstat -m | awk '
 TX_GB=${TX_GB:-0}
 
 if [ "$INCLUDE_UPLOAD" == "yes" ]; then
-    USED_GB=$(echo "scale=2; $RX_GB + $TX_GB" | bc)
+    USED_GB=$(echo "scale=2; $RX_GB + $TX_GB" | bc | awk '{printf "%.2f", $0}')
 else
     USED_GB=$RX_GB
 fi
 
-ACTUAL_USED=$(echo "scale=2; $USED_GB + $OFFSET" | bc)
+ACTUAL_USED=$(echo "scale=2; $USED_GB + $OFFSET" | bc | awk '{printf "%.2f", $0}')
 
 # --- بخش ریست خودکار ---
-if [ -n "$EXPIRY_DATE" ]; then
-    TODAY_TS=$(date +%s -d "$(date +%Y-%m-%d)")
-    EXPIRY_TS=$(date +%s -d "$EXPIRY_DATE")
+TODAY_TS=$(date +%s -d "$(date +%Y-%m-%d)")
+EXPIRY_TS=$(date +%s -d "$EXPIRY_DATE")
 
-    if [ "$TODAY_TS" -ge "$EXPIRY_TS" ]; then
-        if [ "$CARRY_OVER" == "yes" ]; then
-            if (( $(echo "$ACTUAL_USED <= $EXTRA_GB" | bc -l) )); then
-                EXTRA_GB=$(echo "scale=2; $EXTRA_GB - $ACTUAL_USED" | bc)
-            else
-                EXTRA_GB=0
-            fi
+if [ "$TODAY_TS" -ge "$EXPIRY_TS" ]; then
+    TOTAL_REMAINING=$(echo "scale=2; ($BASE_LIMIT + $EXTRA_GB) - $ACTUAL_USED" | bc | awk '{printf "%.2f", $0}')
+    
+    if [ "$CARRY_OVER" == "yes" ]; then
+        if (( $(echo "$TOTAL_REMAINING > 0" | bc -l) )); then
+            EXTRA_GB=$TOTAL_REMAINING
         else
             EXTRA_GB=0
         fi
-
-        vnstat --create -i eth0 --force > /dev/null 2>&1
-        EXPIRY_DATE=$(date +%Y-%m-%d -d "$EXPIRY_DATE + 1 month")
-        OFFSET=0
-        save_settings
-
-        USED_GB=0
-        ACTUAL_USED=0
-        RX_GB=0
-        TX_GB=0
+    else
+        EXTRA_GB=0
     fi
+    
+    sudo systemctl stop vnstat > /dev/null 2>&1
+    sudo rm -rf /var/lib/vnstat/*
+    sudo systemctl start vnstat > /dev/null 2>&1
+    
+    EXPIRY_DATE=$(date +%Y-%m-%d -d "$EXPIRY_DATE + 1 month")
+    OFFSET=0
+    save_settings
+    
+    USED_GB=0
+    ACTUAL_USED=0
+    RX_GB=0
+    TX_GB=0
 fi
 
-TOTAL_LIMIT=$(echo "scale=2; $BASE_LIMIT + $EXTRA_GB" | bc)
+TOTAL_LIMIT=$(echo "scale=2; $BASE_LIMIT + $EXTRA_GB" | bc | awk '{printf "%.2f", $0}')
 
 # --- نمایش خروجی ---
 echo -e "\e[1;36m====================================================\e[0m"
@@ -555,38 +563,32 @@ vnstat -d --short | grep -v "estimated" | grep -A 5 "day" | tail -n 5 | \
 awk '{printf " %-12s %-12s %-12s %-12s\n", $1, $2$3, $5$6, $8$9}'
 echo -e "\e[1;36m----------------------------------------------------\e[0m"
 
-REMAINING_GB=$(echo "scale=2; $TOTAL_LIMIT - $ACTUAL_USED" | bc)
+REMAINING_GB=$(echo "scale=2; $TOTAL_LIMIT - $ACTUAL_USED" | bc | awk '{printf "%.2f", $0}')
 
 if (( $(echo "$ACTUAL_USED <= $EXTRA_GB" | bc -l) )); then
     EXTRA_LEFT=$(echo "scale=2; $EXTRA_GB - $ACTUAL_USED" | bc | awk '{printf "%.2f", $0}')
     BASE_LEFT=$(echo "scale=2; $BASE_LIMIT" | bc | awk '{printf "%.2f", $0}')
 else
     EXTRA_LEFT="0.00"
-    BASE_LEFT=$(echo "scale=2; $BASE_LIMIT - ($ACTUAL_USED - $EXTRA_GB)" | bc | awk '{printf "%.2f", $0}')
+    BASE_LEFT=$(echo "scale=2; ($BASE_LIMIT + $EXTRA_GB) - $ACTUAL_USED" | bc | awk '{printf "%.2f", $0}')
 fi
 
-# محاسبه ایمن روزها
-if [ -z "$EXPIRY_DATE" ]; then
-    DAYS_LEFT="-"
-else
-    CURRENT_TIME=$(date +%s)
-    TARGET_TIME=$(date -d "$EXPIRY_DATE" +%s)
-    SECONDS_LEFT=$(( TARGET_TIME - CURRENT_TIME ))
-    DAYS_LEFT=$(( SECONDS_LEFT / 86400 ))
-    if [ "$DAYS_LEFT" -le 0 ]; then DAYS_LEFT=0; fi
-fi
+DAYS_LEFT=$(( ($(date -d "$EXPIRY_DATE" +%s) - $(date +%s)) / 86400 ))
 
 echo -e "\e[1;32m $L_RX $RX_GB GB\e[0m"
 echo -e "\e[1;32m $L_TX $TX_GB GB\e[0m"
 
-if (( $(echo "$OFFSET > 0" | bc -l) )); then
-    echo -e "\e[1;35m $L_OFFSET $OFFSET GB\e[0m"
+# نمایش درست صفر برای اعداد اعشاری در آفست
+DISP_OFFSET=$(echo "$OFFSET" | awk '{printf "%.2f", $0}')
+
+if (( $(echo "$OFFSET != 0" | bc -l) )); then
+    echo -e "\e[1;35m $L_OFFSET $DISP_OFFSET GB\e[0m"
 fi
 echo -e "\e[1;31m $L_CAPACITY $TOTAL_LIMIT GB\e[0m"
 
 echo -e "\e[1;33m ($L_BASE_LEFT: $BASE_LEFT GB | $L_EXTRA_LEFT: $EXTRA_LEFT GB)\e[0m"
 
-if [[ "$DAYS_LEFT" == "-" ]] || [ "$DAYS_LEFT" -gt 0 ]; then
+if [ $DAYS_LEFT -gt 0 ]; then
     echo -e "\e[1;35m $L_DAYS $DAYS_LEFT\e[0m"
     echo -e "\e[1;34m $L_REMAINING $REMAINING_GB GB\e[0m"
 else
@@ -603,7 +605,9 @@ read -p "$L_SELECT" opt
 
 case "$opt" in
     1) read -p "$L_PR_EXT" new_gb
-       EXTRA_GB=$(echo "scale=2; $EXTRA_GB + $new_gb" | bc)
+       new_gb=${new_gb#+}
+       [ -z "$new_gb" ] && new_gb=0
+       EXTRA_GB=$(echo "scale=2; $EXTRA_GB + ($new_gb)" | bc | awk '{printf "%.2f", $0}')
        save_settings
        exec bash "$0" ;;
     2) read -p "$L_PR_BAS" new_base
@@ -617,10 +621,11 @@ case "$opt" in
     4) EXTRA_GB=0
        save_settings
        exec bash "$0" ;;
-    5)
+    5) 
+       TOTAL_REMAINING=$(echo "scale=2; ($BASE_LIMIT + $EXTRA_GB) - $ACTUAL_USED" | bc | awk '{printf "%.2f", $0}')
        if [ "$CARRY_OVER" == "yes" ]; then
-           if (( $(echo "$ACTUAL_USED <= $EXTRA_GB" | bc -l) )); then
-               EXTRA_GB=$(echo "scale=2; $EXTRA_GB - $ACTUAL_USED" | bc)
+           if (( $(echo "$TOTAL_REMAINING > 0" | bc -l) )); then
+               EXTRA_GB=$TOTAL_REMAINING
            else
                EXTRA_GB=0
            fi
@@ -628,24 +633,29 @@ case "$opt" in
            EXTRA_GB=0
        fi
        OFFSET=0
+       EXPIRY_DATE=$(date +%Y-%m-%d -d "$EXPIRY_DATE + 1 month")
        save_settings
-       vnstat --create -i eth0 --force > /dev/null 2>&1
+       sudo systemctl stop vnstat > /dev/null 2>&1
+       sudo rm -rf /var/lib/vnstat/*
+       sudo systemctl start vnstat > /dev/null 2>&1
        echo -e "\e[1;32m $L_MSG_RES\e[0m"
        sleep 1
        exec bash "$0" ;;
     6) read -p "$L_PR_OFF" new_offset
-       OFFSET=$(echo "scale=2; $OFFSET + $new_offset" | bc)
+       new_offset=${new_offset#+}
+       [ -z "$new_offset" ] && new_offset=0
+       OFFSET=$(echo "scale=2; $OFFSET + ($new_offset)" | bc | awk '{printf "%.2f", $0}')
        save_settings
        exec bash "$0" ;;
-    7)
+    7) 
        if [ "$CARRY_OVER" == "yes" ]; then CARRY_OVER="no"; else CARRY_OVER="yes"; fi
        save_settings
        exec bash "$0" ;;
-    8)
+    8) 
        if [ "$INCLUDE_UPLOAD" == "yes" ]; then INCLUDE_UPLOAD="no"; else INCLUDE_UPLOAD="yes"; fi
        save_settings
        exec bash "$0" ;;
-    9)
+    9) 
        if [ "$LANGUAGE" == "en" ]; then LANGUAGE="fa"; else LANGUAGE="en"; fi
        save_settings
        exec bash "$0" ;;
