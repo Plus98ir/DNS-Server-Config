@@ -231,6 +231,4 @@ https://yourdomain.com:8443/dns-query/yourclientname
 ```
 
 مکمل کنترل سرور و مدیریت از طریق ربات تلگرام
-```html
-https://github.com/Plus98ir/Remote-Server-Control
-```
+[![Remote-Server-Control](https://YOUR-IMAGE-URL.png)](https://github.com/Plus98ir/Remote-Server-Control)
