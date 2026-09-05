@@ -17,7 +17,7 @@
 
 ### 📌 Overview
 
-**Important Note:** Please be very careful when entering your password. If you enter the incorrect password twice, the system will automatically block your device's IP (the computer or phone you are using).
+**Important Note:** Please be very careful when entering your password. If you enter the incorrect password 4 times, the system will automatically block your device's IP (the computer or phone you are using).
 
 This script is an **All-in-One Automated Setup** for creating a secure, high-performance routing server. It automatically installs and configures essential tools for traffic routing, DNS management, and access control.
 
@@ -218,3 +218,7 @@ If you run into any issues, feel free to contact me on Telegram. I will get back
 ```
 @PlusNE
 ```
+
+Server control and management supplement via Telegram bot
+
+[Remote-Server-Control](https://github.com/Plus98ir/Remote-Server-Control)
